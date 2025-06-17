@@ -37,13 +37,13 @@ export async function fetchLatestInvoices() {
             SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
             FROM invoices
                      JOIN customers ON invoices.customer_id = customers.id
-            ORDER BY invoices.date DESC LIMIT 5`;
+            ORDER BY invoices.date DESC
+            LIMIT 5`;
 
-        const latestInvoices = data.map((invoice) => ({
+        return data.map((invoice) => ({
             ...invoice,
             amount: formatCurrency(invoice.amount),
         }));
-        return latestInvoices;
     } catch (error) {
         console.error('Database Error:', error);
         throw new Error('Failed to fetch the latest invoices.');
@@ -95,7 +95,7 @@ export async function fetchFilteredInvoices(
     const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
     try {
-        const invoices = await sql<InvoicesTable[]>`
+        return await sql<InvoicesTable[]>`
             SELECT invoices.id,
                    invoices.amount,
                    invoices.date,
@@ -106,20 +106,13 @@ export async function fetchFilteredInvoices(
             FROM invoices
                      JOIN customers ON invoices.customer_id = customers.id
             WHERE customers.name ILIKE ${`%${query}%`}
-               OR
-                customers.email ILIKE ${`%${query}%`}
-               OR
-                invoices.amount::text ILIKE ${`%${query}%`}
-               OR
-                invoices.date::text ILIKE ${`%${query}%`}
-               OR
-                invoices.status ILIKE ${`%${query}%`}
+               OR customers.email ILIKE ${`%${query}%`}
+               OR invoices.amount::text ILIKE ${`%${query}%`}
+               OR invoices.date::text ILIKE ${`%${query}%`}
+               OR invoices.status ILIKE ${`%${query}%`}
             ORDER BY invoices.date DESC
-                LIMIT ${ITEMS_PER_PAGE}
-            OFFSET ${offset}
+            LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
         `;
-
-        return invoices;
     } catch (error) {
         console.error('Database Error:', error);
         throw new Error('Failed to fetch invoices.');
@@ -132,14 +125,10 @@ export async function fetchInvoicesPages(query: string) {
                                FROM invoices
                                         JOIN customers ON invoices.customer_id = customers.id
                                WHERE customers.name ILIKE ${`%${query}%`}
-                                  OR
-                                   customers.email ILIKE ${`%${query}%`}
-                                  OR
-                                   invoices.amount::text ILIKE ${`%${query}%`}
-                                  OR
-                                   invoices.date::text ILIKE ${`%${query}%`}
-                                  OR
-                                   invoices.status ILIKE ${`%${query}%`}
+                                  OR customers.email ILIKE ${`%${query}%`}
+                                  OR invoices.amount::text ILIKE ${`%${query}%`}
+                                  OR invoices.date::text ILIKE ${`%${query}%`}
+                                  OR invoices.status ILIKE ${`%${query}%`}
         `;
 
         return Math.ceil(Number(data[0].count) / ITEMS_PER_PAGE);
@@ -175,14 +164,12 @@ export async function fetchInvoiceById(id: string) {
 
 export async function fetchCustomers() {
     try {
-        const customers = await sql<CustomerField[]>`
+        return await sql<CustomerField[]>`
             SELECT id,
                    name
             FROM customers
-            ORDER BY name ASC
+            ORDER BY name
         `;
-
-        return customers;
     } catch (err) {
         console.error('Database Error:', err);
         throw new Error('Failed to fetch all customers.');
@@ -202,19 +189,16 @@ export async function fetchFilteredCustomers(query: string) {
             FROM customers
                      LEFT JOIN invoices ON customers.id = invoices.customer_id
             WHERE customers.name ILIKE ${`%${query}%`}
-               OR
-                customers.email ILIKE ${`%${query}%`}
+               OR customers.email ILIKE ${`%${query}%`}
             GROUP BY customers.id, customers.name, customers.email, customers.image_url
-            ORDER BY customers.name ASC
+            ORDER BY customers.name
         `;
 
-        const customers = data.map((customer) => ({
+        return data.map((customer) => ({
             ...customer,
             total_pending: formatCurrency(customer.total_pending),
             total_paid: formatCurrency(customer.total_paid),
         }));
-
-        return customers;
     } catch (err) {
         console.error('Database Error:', err);
         throw new Error('Failed to fetch customer table.');
