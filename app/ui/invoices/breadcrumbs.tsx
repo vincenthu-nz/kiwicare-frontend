@@ -8,11 +8,12 @@ interface Breadcrumb {
   active?: boolean;
 }
 
-export default function Breadcrumbs({
-  breadcrumbs,
-}: {
-  breadcrumbs: Breadcrumb[];
-}) {
+export default function Breadcrumbs(
+  {
+    breadcrumbs,
+  }: {
+    breadcrumbs: Breadcrumb[];
+  }) {
   return (
     <nav aria-label="Breadcrumb" className="mb-6 block">
       <ol className={clsx(lusitana.className, 'flex text-xl md:text-2xl')}>
@@ -25,9 +26,10 @@ export default function Breadcrumbs({
             )}
           >
             <Link href={breadcrumb.href}>{breadcrumb.label}</Link>
-            {index < breadcrumbs.length - 1 ? (
+
+            {index < breadcrumbs.length - 1 && (
               <span className="mx-3 inline-block">/</span>
-            ) : null}
+            )}
           </li>
         ))}
       </ol>

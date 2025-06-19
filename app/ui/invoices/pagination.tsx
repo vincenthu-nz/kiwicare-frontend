@@ -17,14 +17,10 @@ export default function Pagination({ totalPages }: {totalPages: number}) {
         return `${pathname}?${params.toString()}`;
     };
 
-    // NOTE: Uncomment this code in Chapter 11
-
     const allPages = generatePagination(currentPage, totalPages);
 
     return (
         <>
-            {/*  NOTE: Uncomment this code in Chapter 11 */}
-
             <div className="inline-flex">
                 <PaginationArrow
                     direction="left"
@@ -43,7 +39,7 @@ export default function Pagination({ totalPages }: {totalPages: number}) {
 
                         return (
                             <PaginationNumber
-                                key={page}
+                                key={`${page}-${index}`}
                                 href={createPageURL(page)}
                                 page={page}
                                 position={position}
@@ -63,17 +59,18 @@ export default function Pagination({ totalPages }: {totalPages: number}) {
     );
 }
 
-function PaginationNumber({
-                              page,
-                              href,
-                              isActive,
-                              position,
-                          }: {
-    page: number | string;
-    href: string;
-    position?: 'first' | 'last' | 'middle' | 'single';
-    isActive: boolean;
-}) {
+function PaginationNumber(
+    {
+        page,
+        href,
+        isActive,
+        position,
+    }: {
+        page: number | string;
+        href: string;
+        position?: 'first' | 'last' | 'middle' | 'single';
+        isActive: boolean;
+    }) {
     const className = clsx(
         'flex h-10 w-10 items-center justify-center text-sm border',
         {
@@ -94,15 +91,16 @@ function PaginationNumber({
     );
 }
 
-function PaginationArrow({
-                             href,
-                             direction,
-                             isDisabled,
-                         }: {
-    href: string;
-    direction: 'left' | 'right';
-    isDisabled?: boolean;
-}) {
+function PaginationArrow(
+    {
+        href,
+        direction,
+        isDisabled,
+    }: {
+        href: string;
+        direction: 'left' | 'right';
+        isDisabled?: boolean;
+    }) {
     const className = clsx(
         'flex h-10 w-10 items-center justify-center rounded-md border',
         {
