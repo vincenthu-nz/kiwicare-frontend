@@ -1,15 +1,14 @@
 import Search from '@/app/ui/search';
-import { CreateInvoice } from '@/app/ui/invoices/buttons';
 import { lusitana } from '@/app/ui/fonts';
-import InvoicesTable from '@/app/ui/invoices/table';
-import { fetchInvoicesPages } from '@/app/lib/data';
+import { fetchUsersPages } from '@/app/lib/data';
 import Pagination from '@/app/ui/invoices/pagination';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
-import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
+import { UsersTableSkeleton } from '@/app/ui/skeletons';
+import UserTable from '@/app/ui/users/table';
 
 export const metadata: Metadata = {
-  title: 'Invoices | KiwiCare Dashboard',
+  title: 'Users | KiwiCare Dashboard',
 };
 
 export default async function Page(props: {
@@ -21,18 +20,17 @@ export default async function Page(props: {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
-  const totalPages = await fetchInvoicesPages(query);
+  const totalPages = await fetchUsersPages(query);
 
   return (
     <div className="w-full">
-      <h1 className={`${lusitana.className} text-2xl`}>Invoices</h1>
+      <h1 className={`${lusitana.className} text-2xl`}>Users</h1>
 
       <div className="mt-4 flex justify-between gap-2 md:mt-8">
-        <Search placeholder="Search invoices..." />
-        <CreateInvoice />
+        <Search placeholder="Search users..." />
       </div>
-      <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
-        <InvoicesTable query={query} currentPage={currentPage} />
+      <Suspense key={query + currentPage} fallback={<UsersTableSkeleton />}>
+        <UserTable query={query} currentPage={currentPage} />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={totalPages} />
