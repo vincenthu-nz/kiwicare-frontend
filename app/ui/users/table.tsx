@@ -3,6 +3,7 @@ import { fetchFilteredUsers } from '@/app/lib/data';
 import UserStatus from '@/app/ui/users/status';
 import EmptyState from '@/app/ui/empty-state';
 import { EditUserStatus } from '@/app/ui/users/button';
+import { getCurrentUserId } from '@/auth_token';
 
 export default async function UserTable({
   query,
@@ -19,6 +20,8 @@ export default async function UserTable({
     return <EmptyState />;
   }
 
+  const currentUserId = await getCurrentUserId();
+
   return (
     <div className="mt-6 rounded-lg bg-gray-50 p-2 md:pt-0">
       <div className="md:hidden">
@@ -34,7 +37,12 @@ export default async function UserTable({
                     height={28}
                     alt={`${user.name}'s profile picture`}
                   />
-                  <p>{user.name}</p>
+                  <p>
+                    {user.name}{' '}
+                    {user.id === currentUserId && (
+                      <span className="font-semibold">(You)</span>
+                    )}
+                  </p>
                 </div>
                 <p className="text-sm text-gray-500">{user.email}</p>
               </div>
@@ -89,7 +97,12 @@ export default async function UserTable({
                     height={28}
                     alt={`${user.name}'s profile picture`}
                   />
-                  <p>{user.name}</p>
+                  <p>
+                    {user.name}{' '}
+                    {user.id === currentUserId && (
+                      <span className="font-semibold">(You)</span>
+                    )}
+                  </p>
                 </div>
               </td>
               <td className="whitespace-nowrap px-3 py-3">{user.email}</td>
@@ -99,12 +112,14 @@ export default async function UserTable({
                 <UserStatus status={user.status} />
               </td>
               <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                <div className="flex justify-end gap-3">
-                  <EditUserStatus
-                    id={user.id}
-                    status={user.status}
-                    role={user.role}
-                  />
+                <div className="flex min-w-[40px] justify-end gap-3">
+                  {user.id !== currentUserId && (
+                    <EditUserStatus
+                      id={user.id}
+                      status={user.status}
+                      role={user.role}
+                    />
+                  )}
                 </div>
               </td>
             </tr>

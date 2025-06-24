@@ -13,6 +13,7 @@ import {
 import { formatCurrency } from './utils';
 import sql from '@/app/lib/db';
 import { revalidatePath } from 'next/cache';
+import { getCurrentUserId } from '@/auth_token';
 
 export async function fetchRevenue(): Promise<
   { month: string; revenue: number }[]
@@ -103,11 +104,12 @@ export async function fetchFilteredInvoices(
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    return await sql<InvoicesTable[]>`
+    const data = await sql<InvoicesTable[]>`
       SELECT invoices.id,
              invoices.amount,
              invoices.date,
              invoices.status,
+             users.id as user_id,
              users.name,
              users.email,
              users.avatar
@@ -121,6 +123,8 @@ export async function fetchFilteredInvoices(
       ORDER BY invoices.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
+
+    return data;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoices.');
@@ -256,6 +260,21 @@ export async function updateUserStatus(
   formData: FormData,
 ): Promise<State<'userId'>> {
   const status = formData.get('status') as UserStatus;
+
+  const currentUserId = await getCurrentUserId();
+  if (!currentUserId) {
+    return {
+      message: 'Not authenticated',
+      errors: { userId: ['Unauthenticated'] },
+    };
+  }
+
+  if (currentUserId === id) {
+    return {
+      message: 'You cannot modify your own status',
+      errors: { userId: ['Operation not allowed'] },
+    };
+  }
 
   const result = await sql<{ status: UserStatus }[]>`
     SELECT status

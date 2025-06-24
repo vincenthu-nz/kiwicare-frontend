@@ -4,6 +4,7 @@ import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatCurrency, formatDateToLocal } from '@/app/lib/utils';
 import { fetchFilteredInvoices } from '@/app/lib/data';
 import EmptyState from '@/app/ui/empty-state';
+import { getCurrentUserId } from '@/auth_token';
 
 export default async function InvoicesTable({
   query,
@@ -14,9 +15,15 @@ export default async function InvoicesTable({
 }) {
   const invoices = await fetchFilteredInvoices(query, currentPage);
 
+  console.log(invoices);
+
   if (invoices.length === 0) {
     return <EmptyState />;
   }
+
+  const currentUserId = await getCurrentUserId();
+
+  console.log('Current User ID:', currentUserId);
 
   return (
     <div className="mt-6 rounded-lg bg-gray-50 p-2 md:pt-0">
@@ -33,7 +40,12 @@ export default async function InvoicesTable({
                     height={28}
                     alt={`${invoice.name}'s profile picture`}
                   />
-                  <p>{invoice.name}</p>
+                  <p>
+                    {invoice.name}{' '}
+                    {invoice.user_id === currentUserId && (
+                      <span className="font-semibold">(You)</span>
+                    )}
+                  </p>
                 </div>
                 <p className="text-sm text-gray-500">{invoice.email}</p>
               </div>
@@ -92,7 +104,12 @@ export default async function InvoicesTable({
                     height={28}
                     alt={`${invoice.name}'s profile picture`}
                   />
-                  <p>{invoice.name}</p>
+                  <p>
+                    {invoice.name}{' '}
+                    {invoice.user_id === currentUserId && (
+                      <span className="font-semibold">(You)</span>
+                    )}
+                  </p>
                 </div>
               </td>
               <td className="whitespace-nowrap px-3 py-3">{invoice.email}</td>
