@@ -1,13 +1,18 @@
+'use server';
+
 import {
   CustomerField,
   InvoiceForm,
   InvoicesTable,
   LatestInvoiceRaw,
   Revenue,
+  State,
   User,
+  UserStatus,
 } from './definitions';
 import { formatCurrency } from './utils';
 import sql from '@/app/lib/db';
+import { revalidatePath } from 'next/cache';
 
 export async function fetchRevenue(): Promise<
   { month: string; revenue: number }[]
@@ -243,4 +248,36 @@ export async function fetchFilteredUsers(
     console.error('Database Error:', err);
     throw new Error('Failed to fetch users.');
   }
+}
+
+export async function updateUserStatus(
+  id: string,
+  _prevState: State<'userId'>,
+  formData: FormData,
+): Promise<State<'userId'>> {
+  const status = formData.get('status') as UserStatus;
+
+  const result = await sql<{ status: UserStatus }[]>`
+    SELECT status
+    FROM users
+    WHERE id = ${id}
+  `;
+
+  if (result.length === 0) {
+    return { message: 'User not found', errors: { userId: ['Not found'] } };
+  }
+
+  const currentStatus = result[0].status;
+  if (currentStatus === status) {
+    return { message: 'No change' };
+  }
+
+  await sql`
+    UPDATE users
+    SET status = ${status}
+    WHERE id = ${id}
+  `;
+
+  revalidatePath('/dashboard/users');
+  return { message: 'User status updated' };
 }

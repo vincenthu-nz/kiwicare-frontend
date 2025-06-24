@@ -1,3 +1,23 @@
+export enum UserStatus {
+  ACTIVE = 'active',
+  PENDING = 'pending',
+  BANNED = 'banned',
+}
+
+export enum Role {
+  ADMIN = 'admin',
+  CUSTOMER = 'customer',
+  PROVIDER = 'provider',
+}
+
+export type UserValidationFields = 'userId' | 'amount' | 'status';
+export type CustomerValidationFields = 'customerId' | 'amount' | 'status';
+
+export type State<TFieldNames extends string = string> = {
+  errors?: Partial<Record<TFieldNames, string[]>>;
+  message?: string | null;
+};
+
 // This file contains type definitions for your data.
 // It describes the shape of the data, and what data type each property should accept.
 // For simplicity of teaching, we're manually defining these types.
@@ -9,8 +29,8 @@ export type User = {
   password: string;
   avatar: string;
   city: string;
-  role: 'admin' | 'customer' | 'provider';
-  status: 'active' | 'pending' | 'banned';
+  role: Role;
+  status: UserStatus;
 };
 
 export type Customer = {

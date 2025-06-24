@@ -1,8 +1,8 @@
 import Image from 'next/image';
-import { DeleteInvoice, UpdateInvoice } from '@/app/ui/invoices/buttons';
 import { fetchFilteredUsers } from '@/app/lib/data';
 import UserStatus from '@/app/ui/users/status';
 import EmptyState from '@/app/ui/empty-state';
+import { EditUserStatus } from '@/app/ui/users/button';
 
 export default async function UserTable({
   query,
@@ -41,8 +41,11 @@ export default async function UserTable({
             </div>
             <div className="flex w-full items-center justify-between pt-4">
               <div className="flex justify-end gap-2">
-                <UpdateInvoice id={user.id} />
-                <DeleteInvoice id={user.id} />
+                <EditUserStatus
+                  id={user.id}
+                  status={user.status}
+                  role={user.role}
+                />
               </div>
             </div>
           </div>
@@ -97,7 +100,11 @@ export default async function UserTable({
               </td>
               <td className="whitespace-nowrap py-3 pl-6 pr-3">
                 <div className="flex justify-end gap-3">
-                  <UpdateInvoice id={user.id} />
+                  <EditUserStatus
+                    id={user.id}
+                    status={user.status}
+                    role={user.role}
+                  />
                 </div>
               </td>
             </tr>

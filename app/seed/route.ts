@@ -26,7 +26,11 @@ async function seedUsers() {
       avatar         TEXT,
       city           TEXT,
       role           VARCHAR(20) DEFAULT 'customer' CHECK ( role IN ('customer', 'provider', 'admin') ),
-      status         VARCHAR(20) DEFAULT 'pending' CHECK ( status IN ('pending', 'active', 'banned') ),
+      status         VARCHAR(20) DEFAULT 'active' CHECK (
+        (role = 'provider' AND status IN ('pending', 'active', 'banned'))
+          OR
+        (role IN ('customer', 'admin') AND status IN ('active', 'banned'))
+        ),
       email_verified BOOLEAN     DEFAULT FALSE,
       phone_verified BOOLEAN     DEFAULT FALSE,
       last_login_at  TIMESTAMPTZ,
