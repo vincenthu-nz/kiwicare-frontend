@@ -213,20 +213,34 @@ export async function fetchUsersPages(query: string) {
   }
 }
 
-export async function fetchFilteredUsers(query: string, currentPage: number) {
+export async function fetchFilteredUsers(
+  query: string,
+  currentPage: number,
+  role: string,
+) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+  const likeQuery = `%${query}%`;
+
+  let baseSQL = `
+    SELECT id, name, email, avatar, city, role, status
+    FROM users
+    WHERE (name ILIKE $1 OR email ILIKE $1)
+  `;
+  const values: any[] = [likeQuery];
+
+  // If a role is provided, add it to the WHERE clause
+  if (role) {
+    baseSQL += ` AND role = $2`;
+    values.push(role);
+  }
+
+  baseSQL += ` ORDER BY name LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+  values.push(ITEMS_PER_PAGE, offset);
 
   try {
-    return await sql<User[]>`
-      SELECT id, name, email, avatar, city, role, status
-      FROM users
-      WHERE name ILIKE ${`%${query}%`}
-         OR email ILIKE ${`%${query}%`}
-      ORDER BY name
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
-    `;
+    return await sql.unsafe(baseSQL, values);
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch customer table.');
+    throw new Error('Failed to fetch users.');
   }
 }

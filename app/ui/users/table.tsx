@@ -2,15 +2,22 @@ import Image from 'next/image';
 import { DeleteInvoice, UpdateInvoice } from '@/app/ui/invoices/buttons';
 import { fetchFilteredUsers } from '@/app/lib/data';
 import UserStatus from '@/app/ui/users/status';
+import EmptyState from '@/app/ui/empty-state';
 
 export default async function UserTable({
   query,
   currentPage,
+  role,
 }: {
   query: string;
   currentPage: number;
+  role: string;
 }) {
-  const users = await fetchFilteredUsers(query, currentPage);
+  const users = await fetchFilteredUsers(query, currentPage, role);
+
+  if (users.length === 0) {
+    return <EmptyState />;
+  }
 
   return (
     <div className="mt-6 rounded-lg bg-gray-50 p-2 md:pt-0">
@@ -59,9 +66,9 @@ export default async function UserTable({
             <th scope="col" className="px-3 py-5 font-medium">
               Status
             </th>
-            {/*<th scope="col" className="relative py-3 pl-6 pr-3">*/}
-            {/*  <span className="sr-only">Edit</span>*/}
-            {/*</th>*/}
+            <th scope="col" className="relative py-3 pl-6 pr-3">
+              <span className="sr-only">Edit</span>
+            </th>
           </tr>
         </thead>
         <tbody className="bg-white">
@@ -88,12 +95,11 @@ export default async function UserTable({
               <td className="whitespace-nowrap px-3 py-3">
                 <UserStatus status={user.status} />
               </td>
-              {/*<td className="whitespace-nowrap py-3 pl-6 pr-3">*/}
-              {/*  <div className="flex justify-end gap-3">*/}
-              {/*    <UpdateInvoice id={user.id} />*/}
-              {/*    <DeleteInvoice id={user.id} />*/}
-              {/*  </div>*/}
-              {/*</td>*/}
+              <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                <div className="flex justify-end gap-3">
+                  <UpdateInvoice id={user.id} />
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>

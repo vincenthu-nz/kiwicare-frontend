@@ -3,6 +3,7 @@ import { DeleteInvoice, UpdateInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatCurrency, formatDateToLocal } from '@/app/lib/utils';
 import { fetchFilteredInvoices } from '@/app/lib/data';
+import EmptyState from '@/app/ui/empty-state';
 
 export default async function InvoicesTable({
   query,
@@ -12,6 +13,10 @@ export default async function InvoicesTable({
   currentPage: number;
 }) {
   const invoices = await fetchFilteredInvoices(query, currentPage);
+
+  if (invoices.length === 0) {
+    return <EmptyState />;
+  }
 
   return (
     <div className="mt-6 rounded-lg bg-gray-50 p-2 md:pt-0">

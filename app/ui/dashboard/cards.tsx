@@ -3,14 +3,14 @@ import {
   BriefcaseIcon,
   ClockIcon,
   InboxIcon,
-  UserGroupIcon,
+  ShoppingCartIcon,
 } from '@heroicons/react/24/outline';
 import { lusitana } from '@/app/ui/fonts';
 import { fetchCardData } from '@/app/lib/data';
 
 const iconMap = {
   collected: BanknotesIcon,
-  customers: UserGroupIcon,
+  customers: ShoppingCartIcon,
   provider: BriefcaseIcon,
   pending: ClockIcon,
   invoices: InboxIcon,
