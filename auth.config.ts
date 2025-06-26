@@ -10,7 +10,7 @@ export const authConfig = {
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
       if (isOnDashboard) {
         return isLoggedIn;
-        // Redirect unauthenticated users to login page
+        // Redirect unauthenticated users to login page.tsx
       } else if (isLoggedIn) {
         return Response.redirect(new URL('/dashboard', nextUrl));
       }

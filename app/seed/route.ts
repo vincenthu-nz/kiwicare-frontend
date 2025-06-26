@@ -142,6 +142,7 @@ async function seedProvider() {
       user_id        UUID NOT NULL UNIQUE REFERENCES users (id) ON DELETE CASCADE,
       license_number VARCHAR(50) UNIQUE,
       service_radius INTEGER     DEFAULT 10 CHECK (service_radius >= 0),
+      location       VARCHAR(50),
       latitude       DOUBLE PRECISION,
       longitude      DOUBLE PRECISION,
       bio            TEXT,

@@ -83,6 +83,7 @@ const providers = [
     user_id: 'a5be9c40-f849-4c77-b92c-9260ff5e9a8b',
     license_number: 'THERA-0001',
     service_radius: 15,
+    location: 'Christchurch',
     latitude: -43.5321,
     longitude: 172.6362,
     bio: 'Experienced massage therapist with over 10 years of experience in deep tissue and relaxation techniques.',

@@ -80,6 +80,32 @@ export type InvoicesTable = {
   status: 'pending' | 'paid';
 };
 
+export type OrdersTable = {
+  id: string;
+  customer_id: string;
+  customer_avatar: string;
+  customer_name: string;
+  customer_location: string;
+  customer_longitude: number;
+  customer_latitude: number;
+  provider_id: string;
+  provider_avatar: string;
+  provider_name: string;
+  provider_location: string;
+  provider_longitude: number;
+  provider_latitude: number;
+  service: string;
+  date: string;
+  amount: number;
+  status:
+    | 'pending'
+    | 'accepted'
+    | 'in_progress'
+    | 'completed'
+    | 'cancelled'
+    | 'rejected';
+};
+
 export type CustomersTableType = {
   id: string;
   name: string;

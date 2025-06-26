@@ -5,6 +5,7 @@ import {
   InvoiceForm,
   InvoicesTable,
   LatestInvoiceRaw,
+  OrdersTable,
   Revenue,
   State,
   User,
@@ -14,6 +15,8 @@ import { formatCurrency } from './utils';
 import sql from '@/app/lib/db';
 import { revalidatePath } from 'next/cache';
 import { getCurrentUserId } from '@/auth_token';
+
+const ITEMS_PER_PAGE = 6;
 
 export async function fetchRevenue(): Promise<
   { month: string; revenue: number }[]
@@ -95,8 +98,6 @@ export async function fetchCardData() {
   }
 }
 
-const ITEMS_PER_PAGE = 6;
-
 export async function fetchFilteredInvoices(
   query: string,
   currentPage: number,
@@ -104,7 +105,7 @@ export async function fetchFilteredInvoices(
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const data = await sql<InvoicesTable[]>`
+    return await sql<InvoicesTable[]>`
       SELECT invoices.id,
              invoices.amount,
              invoices.date,
@@ -123,8 +124,6 @@ export async function fetchFilteredInvoices(
       ORDER BY invoices.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
-
-    return data;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoices.');
@@ -299,4 +298,118 @@ export async function updateUserStatus(
 
   revalidatePath('/dashboard/users');
   return { message: 'User status updated' };
+}
+
+export async function fetchOrdersPages(query: string) {
+  try {
+    const data = await sql`
+      SELECT COUNT(*)
+      FROM orders
+             LEFT JOIN users AS customers ON orders.customer_id = customers.id
+             LEFT JOIN users AS providers ON orders.provider_id = providers.id
+             LEFT JOIN services ON orders.service_id = services.id
+             LEFT JOIN invoices ON invoices.order_id = orders.id
+      WHERE customers.name ILIKE ${`%${query}%`}
+         OR customers.email ILIKE ${`%${query}%`}
+         OR providers.name ILIKE ${`%${query}%`}
+         OR providers.email ILIKE ${`%${query}%`}
+         OR services.name ILIKE ${`%${query}%`}
+         OR orders.status ILIKE ${`%${query}%`}
+         OR orders.created_at::text ILIKE ${`%${query}%`}
+         OR invoices.amount::text ILIKE ${`%${query}%`}
+    `;
+
+    return Math.ceil(Number(data[0].count) / ITEMS_PER_PAGE);
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch total number of invoices.');
+  }
+}
+
+export async function fetchFilteredOrders(
+  query: string,
+  currentPage: number = 1,
+) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  try {
+    const data = await sql<OrdersTable[]>`
+      SELECT orders.id,
+             c.id                AS customer_id,
+             c.name              AS customer_name,
+             c.avatar            AS customer_avatar,
+             customers.location  AS customer_location,
+             customers.latitude  AS customer_latitude,
+             customers.longitude AS customer_longitude,
+             p.id                AS provider_id,
+             p.name              AS provider_name,
+             p.avatar            AS provider_avatar,
+             providers.location  AS provider_location,
+             providers.latitude  AS provider_latitude,
+             providers.longitude AS provider_longitude,
+             services.name       AS service,
+             invoices.amount,
+             invoices.date,
+             orders.status
+      FROM orders
+             LEFT JOIN customers ON orders.customer_id = customers.id
+             LEFT JOIN users AS c ON customers.user_id = c.id
+             LEFT JOIN providers ON orders.provider_id = providers.id
+             LEFT JOIN users AS p ON providers.user_id = p.id
+             LEFT JOIN services ON orders.service_id = services.id
+             LEFT JOIN invoices ON invoices.order_id = orders.id
+      WHERE c.name ILIKE ${`%${query}%`}
+         OR c.email ILIKE ${`%${query}%`}
+         OR p.name ILIKE ${`%${query}%`}
+         OR p.email ILIKE ${`%${query}%`}
+         OR services.name ILIKE ${`%${query}%`}
+         OR invoices.amount::text ILIKE ${`%${query}%`}
+         OR invoices.date::text ILIKE ${`%${query}%`}
+         OR orders.status ILIKE ${`%${query}%`}
+      ORDER BY invoices.date DESC
+      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
+    `;
+
+    return data;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch users.');
+  }
+}
+
+export async function fetchOrderById(id: string) {
+  try {
+    const data = await sql<OrdersTable[]>`
+      SELECT orders.id,
+             c.id                AS customer_id,
+             c.name              AS customer_name,
+             c.avatar            AS customer_avatar,
+             customers.location  AS customer_location,
+             customers.latitude  AS customer_latitude,
+             customers.longitude AS customer_longitude,
+             p.id                AS provider_id,
+             p.name              AS provider_name,
+             p.avatar            AS provider_avatar,
+             providers.location  AS provider_location,
+             providers.latitude  AS provider_latitude,
+             providers.longitude AS provider_longitude,
+             services.name       AS service,
+             invoices.amount,
+             orders.created_at   AS date,
+             orders.status
+      FROM orders
+             LEFT JOIN customers ON orders.customer_id = customers.id
+             LEFT JOIN users AS c ON customers.user_id = c.id
+             LEFT JOIN providers ON orders.provider_id = providers.id
+             LEFT JOIN users AS p ON providers.user_id = p.id
+             LEFT JOIN services ON orders.service_id = services.id
+             LEFT JOIN invoices ON invoices.order_id = orders.id
+      WHERE orders.id = ${id}
+    `;
+
+    return data[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch order.');
+  }
 }

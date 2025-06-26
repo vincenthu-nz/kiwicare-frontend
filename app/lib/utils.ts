@@ -21,6 +21,24 @@ export const formatDateToLocal = (
   return formatter.format(date);
 };
 
+export const formatDateTimeToLocal = (
+  dateStr: string,
+  locale: string = 'en-US',
+) => {
+  const date = new Date(dateStr);
+  const options: Intl.DateTimeFormatOptions = {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  };
+  const formatter = new Intl.DateTimeFormat(locale, options);
+  return formatter.format(date);
+};
+
 export const generateYAxis = (revenue: Revenue[], step: number = 1000) => {
   if (revenue.length === 0) return { yAxisLabels: [], topLabel: 0 };
 
@@ -42,21 +60,21 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
     return Array.from({ length: totalPages }, (_, i) => i + 1);
   }
 
-  // If the current page is among the first 3 pages,
+  // If the current page.tsx is among the first 3 pages,
   // show the first 3, an ellipsis, and the last 2 pages.
   if (currentPage <= 3) {
     return [1, 2, 3, '...', totalPages - 1, totalPages];
   }
 
-  // If the current page is among the last 3 pages,
+  // If the current page.tsx is among the last 3 pages,
   // show the first 2, an ellipsis, and the last 3 pages.
   if (currentPage >= totalPages - 2) {
     return [1, 2, '...', totalPages - 2, totalPages - 1, totalPages];
   }
 
-  // If the current page is somewhere in the middle,
-  // show the first page, an ellipsis, the current page and its neighbors,
-  // another ellipsis, and the last page.
+  // If the current page.tsx is somewhere in the middle,
+  // show the first page.tsx, an ellipsis, the current page.tsx and its neighbors,
+  // another ellipsis, and the last page.tsx.
   return [
     1,
     '...',

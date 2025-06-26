@@ -2,9 +2,9 @@ import Image from 'next/image';
 import { DeleteInvoice, UpdateInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatCurrency, formatDateToLocal } from '@/app/lib/utils';
-import { fetchFilteredInvoices } from '@/app/lib/data';
 import EmptyState from '@/app/ui/empty-state';
 import { getCurrentUserId } from '@/auth_token';
+import { fetchFilteredInvoices } from '@/app/lib/data';
 
 export default async function InvoicesTable({
   query,
@@ -22,8 +22,6 @@ export default async function InvoicesTable({
   }
 
   const currentUserId = await getCurrentUserId();
-
-  console.log('Current User ID:', currentUserId);
 
   return (
     <div className="mt-6 rounded-lg bg-gray-50 p-2 md:pt-0">
