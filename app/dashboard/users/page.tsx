@@ -13,15 +13,7 @@ export const metadata: Metadata = {
   title: 'Users | KiwiCare Dashboard',
 };
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams?: {
-    query?: string;
-    page?: string;
-    role?: string;
-  };
-}) {
+export default async function Page({ searchParams }: { searchParams?: any }) {
   const query = searchParams?.query ?? '';
   const currentPage = Number(searchParams?.page) || 1;
   const role = searchParams?.role ?? '';

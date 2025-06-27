@@ -20,11 +20,23 @@ async function getUser(email: string): Promise<User | undefined> {
   }
 }
 
-export const { auth, signIn, signOut } = NextAuth({
+export const { signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
+      credentials: {
+        email: { label: 'Email', type: 'text', placeholder: 'you@example.com' },
+        password: { label: 'Password', type: 'password' },
+      },
       async authorize(credentials) {
+        if (!credentials) {
+          throw new Error('Missing credentials');
+        }
+
+        if (!credentials.email || !credentials.password) {
+          throw new Error('Email and password are required');
+        }
+
         const parsed = z
           .object({
             email: z.string().email(),

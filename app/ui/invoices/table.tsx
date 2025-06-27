@@ -14,9 +14,7 @@ export default async function InvoicesTable({
   currentPage: number;
 }) {
   const invoices = await fetchFilteredInvoices(query, currentPage);
-
-  console.log(invoices);
-
+  
   if (invoices.length === 0) {
     return <EmptyState />;
   }
