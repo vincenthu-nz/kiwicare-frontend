@@ -3,9 +3,12 @@ import { fetchCustomers, fetchInvoiceById } from '@/app/lib/data';
 import { notFound } from 'next/navigation';
 import EditInvoiceForm from '@/app/ui/invoices/edit-form';
 
-export default async function Page(props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
+export default async function Page({ params }: { params: { id: string } }) {
   const id = params.id;
+
+  if (!id) {
+    notFound();
+  }
 
   const [invoice, users] = await Promise.all([
     fetchInvoiceById(id),

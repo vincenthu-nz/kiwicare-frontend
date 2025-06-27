@@ -14,7 +14,7 @@ export default function ClientMapPage({ order }: { order: OrdersTable }) {
       <h1 className={`${lusitana.className} pb-5 text-2xl`}>Map Route</h1>
 
       <div className="overflow-hidden rounded-lg border shadow-sm">
-        <div className="h-[670px] w-full">
+        <div className="h-[400px] w-full sm:h-[670px]">
           <Suspense fallback={<p>Loading...</p>}>
             <MapboxMap order={order} onDistanceCalculated={setDistanceKm} />
           </Suspense>

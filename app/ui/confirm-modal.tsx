@@ -1,21 +1,20 @@
 'use client';
 
-import { Dialog } from '@headlessui/react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Dialog, DialogTitle } from '@headlessui/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
 
-export function ConfirmModal(
-  {
-    trigger,
-    title,
-    description,
-    children,
-  }: {
-    trigger: React.ReactNode;
-    title: string;
-    description?: string;
-    children: React.ReactNode;
-  }) {
+export function ConfirmModal({
+  trigger,
+  title,
+  description,
+  children,
+}: {
+  trigger: React.ReactNode;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+}) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -48,7 +47,9 @@ export function ConfirmModal(
               className="z-50 w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <Dialog.Title className="text-xl font-semibold">{title}</Dialog.Title>
+              <DialogTitle className="text-xl font-semibold">
+                {title}
+              </DialogTitle>
               {description && (
                 <p className="mt-2 text-sm text-gray-600">{description}</p>
               )}

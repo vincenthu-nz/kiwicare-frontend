@@ -11,13 +11,14 @@ export const metadata: Metadata = {
   title: 'Orders | KiwiCare Dashboard',
 };
 
-export default async function Page(props: {
-  searchParams?: Promise<{
+export default async function Page({
+  searchParams,
+}: {
+  searchParams?: {
     query?: string;
     page?: string;
-  }>;
+  };
 }) {
-  const searchParams = await props.searchParams;
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
   const totalPages = await fetchOrdersPages(query);

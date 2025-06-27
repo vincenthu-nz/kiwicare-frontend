@@ -8,9 +8,11 @@ import sql from '@/app/lib/db';
 
 async function getUser(email: string): Promise<User | undefined> {
   try {
-    const user = await sql<User[]>`SELECT *
-                                   FROM users
-                                   WHERE email = ${email}`;
+    const user = await sql<User[]>`
+      SELECT *
+      FROM users
+      WHERE email = ${email}
+    `;
     return user[0];
   } catch (error) {
     console.error('Failed to fetch user:', error);
@@ -23,23 +25,39 @@ export const { auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       async authorize(credentials) {
-        const parsedCredentials = z
-          .object({ email: z.string().email(), password: z.string().min(6) })
+        const parsed = z
+          .object({
+            email: z.string().email(),
+            password: z.string().min(6),
+          })
           .safeParse(credentials);
 
-        if (parsedCredentials.success) {
-          const { email, password } = parsedCredentials.data;
-          const user = await getUser(email);
-          if (!user) return null;
-          const passwordsMatch = await bcrypt.compare(password, user.password);
-
-          if (passwordsMatch) {
-            const { id, name, email, role } = user;
-            return { id, name, email, role };
-          }
+        if (!parsed.success) {
+          throw new Error('Invalid input format');
         }
 
-        return null;
+        const { email, password } = parsed.data;
+
+        const user = await getUser(email);
+        if (!user) {
+          throw new Error('No user found with this email');
+        }
+
+        if (user.status === 'banned') {
+          throw new Error('Your account has been banned');
+        }
+
+        if (user.role !== 'admin') {
+          throw new Error('Only admin users can access this system');
+        }
+
+        const passwordsMatch = await bcrypt.compare(password, user.password);
+        if (!passwordsMatch) {
+          throw new Error('Incorrect password');
+        }
+
+        const { id, name, role } = user;
+        return { id, name, email, role };
       },
     }),
   ],

@@ -156,6 +156,28 @@ const invoices = [
     paid_at: '2025-06-26T12:00:00+12:00',
     status: 'paid',
   },
+  {
+    id: '9f10c31a-ded3-4f59-babc-111111111122',
+    order_id: null,
+    user_id: '410544b2-4001-4271-9855-fec4b6a6442a',
+    amount: 1000,
+    tax_rate: 15.0,
+    platform_fee: 20.0,
+    payment_method: 'credit_card',
+    paid_at: '2025-05-21T12:00:00+12:00',
+    status: 'paid',
+  },
+  {
+    id: '9f10c31a-ded3-4f59-babc-111111111133',
+    order_id: null,
+    user_id: 'a5be9c40-f849-4c77-b92c-9260ff5e9a8b',
+    amount: 1000,
+    tax_rate: 15.0,
+    platform_fee: 20.0,
+    payment_method: 'credit_card',
+    paid_at: '2025-04-11T12:00:00+12:00',
+    status: 'paid',
+  },
 ];
 
 const notifications = [
@@ -173,7 +195,7 @@ const notifications = [
 const userDevices = [
   {
     id: '10101010-aaaa-bbbb-cccc-111111111111',
-    user_id: '410544b2-4001-4271-9855-fec4b6a6442a', // 替换为实际用户 ID
+    user_id: '410544b2-4001-4271-9855-fec4b6a6442a',
     device_token: 'abc123ios_token',
     device_type: 'iOS',
     app_version: '1.0.0',

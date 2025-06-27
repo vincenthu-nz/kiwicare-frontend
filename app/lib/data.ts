@@ -120,7 +120,7 @@ export async function fetchFilteredInvoices(
          OR users.email ILIKE ${`%${query}%`}
          OR invoices.amount::text ILIKE ${`%${query}%`}
          OR invoices.date::text ILIKE ${`%${query}%`}
-         OR invoices.status ILIKE ${`%${query}%`}
+         OR invoices.status::text ILIKE ${`%${query}%`}
       ORDER BY invoices.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
@@ -142,7 +142,7 @@ export async function fetchInvoicesPages(query: string) {
          OR users.email ILIKE ${`%${query}%`}
          OR invoices.amount::text ILIKE ${`%${query}%`}
          OR invoices.date::text ILIKE ${`%${query}%`}
-         OR invoices.status ILIKE ${`%${query}%`}
+         OR invoices.status::text ILIKE ${`%${query}%`}
     `;
 
     return Math.ceil(Number(data[0].count) / ITEMS_PER_PAGE);
@@ -314,7 +314,7 @@ export async function fetchOrdersPages(query: string) {
          OR providers.name ILIKE ${`%${query}%`}
          OR providers.email ILIKE ${`%${query}%`}
          OR services.name ILIKE ${`%${query}%`}
-         OR orders.status ILIKE ${`%${query}%`}
+         OR orders.status::text ILIKE ${`%${query}%`}
          OR orders.created_at::text ILIKE ${`%${query}%`}
          OR invoices.amount::text ILIKE ${`%${query}%`}
     `;
@@ -365,7 +365,7 @@ export async function fetchFilteredOrders(
          OR services.name ILIKE ${`%${query}%`}
          OR invoices.amount::text ILIKE ${`%${query}%`}
          OR invoices.date::text ILIKE ${`%${query}%`}
-         OR orders.status ILIKE ${`%${query}%`}
+         OR orders.status::text ILIKE ${`%${query}%`}
       ORDER BY invoices.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
     `;

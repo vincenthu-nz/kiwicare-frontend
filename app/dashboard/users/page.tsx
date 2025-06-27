@@ -7,25 +7,30 @@ import { Suspense } from 'react';
 import { UsersTableSkeleton } from '@/app/ui/skeletons';
 import UserTable from '@/app/ui/users/table';
 import RoleFilter from '@/app/ui/users/RoleFilter';
+import { notFound } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Users | KiwiCare Dashboard',
 };
 
-export default async function Page(props: {
-  searchParams?: Promise<{
+export default async function Page({
+  searchParams,
+}: {
+  searchParams?: {
     query?: string;
     page?: string;
     role?: string;
-  }>;
+  };
 }) {
-  const searchParams = await props.searchParams;
-
-  const query = searchParams?.query || '';
+  const query = searchParams?.query ?? '';
   const currentPage = Number(searchParams?.page) || 1;
-  const totalPages = await fetchUsersPages(query);
+  const role = searchParams?.role ?? '';
 
-  const role = searchParams?.role || '';
+  if (!query) {
+    notFound();
+  }
+
+  const totalPages = await fetchUsersPages(query);
 
   return (
     <div className="w-full">

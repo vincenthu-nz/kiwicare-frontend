@@ -12,6 +12,109 @@ import {
   users,
 } from '../lib/placeholder-data';
 
+async function createEnums() {
+  await sql.begin(async (sql) => [
+    sql`
+      DO
+      $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+            CREATE TYPE user_role AS ENUM ('customer', 'provider', 'admin');
+          END IF;
+        END
+      $$;
+    `,
+
+    sql`
+      DO
+      $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_status') THEN
+            CREATE TYPE user_status AS ENUM ('pending', 'active', 'banned');
+          END IF;
+        END
+      $$;
+    `,
+
+    sql`
+      DO
+      $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'gender_type') THEN
+            CREATE TYPE gender_type AS ENUM ('male', 'female', 'gender diverse', 'prefer not to say');
+          END IF;
+        END
+      $$;
+    `,
+
+    sql`
+      DO
+      $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_method') THEN
+            CREATE TYPE payment_method AS ENUM ('credit_card', 'bank_transfer', 'cash', 'other');
+          END IF;
+        END
+      $$;
+    `,
+
+    sql`
+      DO
+      $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_status') THEN
+            CREATE TYPE invoice_status AS ENUM ('pending', 'paid', 'refunded', 'cancelled');
+          END IF;
+        END
+      $$;
+    `,
+
+    sql`
+      DO
+      $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_source') THEN
+            CREATE TYPE invoice_source AS ENUM ('order', 'manual', 'system', 'admin');
+          END IF;
+        END
+      $$;
+    `,
+
+    sql`
+      DO
+      $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_type') THEN
+            CREATE TYPE notification_type AS ENUM ('push', 'email', 'sms');
+          END IF;
+        END
+      $$;
+    `,
+
+    sql`
+      DO
+      $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'device_type') THEN
+            CREATE TYPE device_type AS ENUM ('iOS', 'Android');
+          END IF;
+        END
+      $$;
+    `,
+
+    sql`
+      DO
+      $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status') THEN
+            CREATE TYPE order_status AS ENUM ('pending', 'accepted', 'in_progress', 'completed', 'cancelled', 'rejected');
+          END IF;
+        END
+      $$;
+    `,
+  ]);
+}
+
 async function seedUsers() {
   await sql`
     CREATE TABLE IF NOT EXISTS users
@@ -21,12 +124,12 @@ async function seedUsers() {
       email          TEXT         NOT NULL UNIQUE,
       password       TEXT         NOT NULL,
       phone          VARCHAR(20),
-      gender         VARCHAR(30) DEFAULT 'prefer not to say' CHECK ( gender IN ('male', 'female', 'gender diverse', 'prefer not to say')),
+      gender         gender_type DEFAULT 'prefer not to say',
       birthdate      DATE,
       avatar         TEXT,
       city           TEXT,
-      role           VARCHAR(20) DEFAULT 'customer' CHECK ( role IN ('customer', 'provider', 'admin') ),
-      status         VARCHAR(20) DEFAULT 'active' CHECK (
+      role           user_role   DEFAULT 'customer',
+      status         user_status DEFAULT 'active' CHECK (
         (role = 'provider' AND status IN ('pending', 'active', 'banned'))
           OR
         (role IN ('customer', 'admin') AND status IN ('active', 'banned'))
@@ -158,6 +261,7 @@ async function seedProvider() {
                                user_id,
                                license_number,
                                service_radius,
+                               location,
                                latitude,
                                longitude,
                                bio,
@@ -167,6 +271,7 @@ async function seedProvider() {
                 ${provider.user_id},
                 ${provider.license_number},
                 ${provider.service_radius},
+                ${provider.location},
                 ${provider.latitude},
                 ${provider.longitude},
                 ${provider.bio},
@@ -255,16 +360,14 @@ async function seedOrders() {
     CREATE TABLE IF NOT EXISTS orders
     (
       id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-      customer_id     UUID        NOT NULL REFERENCES customers (id) ON DELETE CASCADE,
-      provider_id     UUID        NOT NULL REFERENCES providers (id) ON DELETE CASCADE,
-      service_id      UUID        NOT NULL REFERENCES services (id) ON DELETE RESTRICT,
-      scheduled_start TIMESTAMPTZ NOT NULL,
-
-      status          VARCHAR(20)      DEFAULT 'pending'
-        CHECK (status IN ('pending', 'accepted', 'in_progress', 'completed', 'cancelled', 'rejected')),
-
+      customer_id     UUID                               NOT NULL REFERENCES customers (id) ON DELETE CASCADE,
+      provider_id     UUID                               NOT NULL REFERENCES providers (id) ON DELETE CASCADE,
+      service_id      UUID                               NOT NULL REFERENCES services (id) ON DELETE RESTRICT,
+      scheduled_start TIMESTAMPTZ                        NOT NULL,
+      status          order_status     DEFAULT 'pending' NOT NULL,
       created_at      TIMESTAMPTZ      DEFAULT now()
     );
+
   `;
 
   return await Promise.all(
@@ -294,37 +397,26 @@ async function seedInvoices() {
     (
       id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
       order_id            UUID REFERENCES orders (id) ON DELETE CASCADE,
-      user_id             UUID        NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-
-      amount              INTEGER     NOT NULL,
+      user_id             UUID           NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+      amount              INTEGER        NOT NULL,
       tax_rate            INTEGER          DEFAULT 0,
-
       tax_amount          INTEGER GENERATED ALWAYS AS (
         ROUND((amount * tax_rate)::NUMERIC / 100)
         ) STORED,
-
       total_amount        INTEGER GENERATED ALWAYS AS (
         amount + ROUND((amount * tax_rate)::NUMERIC / 100)
         ) STORED,
-
       platform_fee        INTEGER          DEFAULT 0,
-
       provider_net_income INTEGER GENERATED ALWAYS AS (
         (amount + ROUND((amount * tax_rate)::NUMERIC / 100)) - platform_fee
         ) STORED,
-
-      payment_method      VARCHAR(50) NOT NULL
-        CHECK (payment_method IN ('credit_card', 'bank_transfer', 'cash', 'other')),
-
+      payment_method      payment_method NOT NULL,
       paid_at             TIMESTAMPTZ,
       refund_at           TIMESTAMPTZ,
       refund_reason       TEXT,
       date                TIMESTAMPTZ      DEFAULT now(),
-
-      status              VARCHAR(20)      DEFAULT 'pending'
-        CHECK (status IN ('pending', 'paid', 'refunded', 'cancelled')),
-      source              VARCHAR(20)      DEFAULT 'order'
-        CHECK (source IN ('order', 'manual', 'system', 'admin'))
+      status              invoice_status   DEFAULT 'pending',
+      source              invoice_source   DEFAULT 'order'
     );
   `;
 
@@ -360,12 +452,12 @@ async function seedNotification() {
     CREATE TABLE IF NOT EXISTS notifications
     (
       id      UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
-      user_id UUID         NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-      title   VARCHAR(255) NOT NULL,
-      message TEXT         NOT NULL,
+      user_id UUID              NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+      title   VARCHAR(255)      NOT NULL,
+      message TEXT              NOT NULL,
       sent_at TIMESTAMPTZ DEFAULT now(),
       is_read BOOLEAN     DEFAULT FALSE,
-      type    VARCHAR(20)  NOT NULL CHECK (type IN ('push', 'email', 'sms'))
+      type    notification_type NOT NULL
     );
   `;
 
@@ -393,7 +485,7 @@ async function seedUserDevice() {
       id           UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
       user_id      UUID        NOT NULL REFERENCES users (id) ON DELETE CASCADE,
       device_token TEXT        NOT NULL,
-      device_type  VARCHAR(10) NOT NULL CHECK (device_type IN ('iOS', 'Android')),
+      device_type  device_type NOT NULL,
       app_version  VARCHAR(20),
       created_at   TIMESTAMPTZ DEFAULT now()
     );
@@ -437,7 +529,9 @@ export async function GET() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
 
   try {
-    await sql.begin(async (sql) => [
+    await createEnums();
+
+    await sql.begin(async () => [
       await seedUsers(),
       await seedCustomers(),
       await seedProvider(),

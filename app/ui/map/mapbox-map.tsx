@@ -35,6 +35,7 @@ export default function MapboxMap({
       style: 'mapbox://styles/mapbox/standard',
       center: origin,
       zoom: 13,
+      attributionControl: false,
     });
 
     function addCustomMarker(
@@ -189,5 +190,10 @@ export default function MapboxMap({
     order.provider_name,
   ]);
 
-  return <div ref={mapContainerRef} className="h-[670px] w-full rounded-lg" />;
+  return (
+    <div
+      ref={mapContainerRef}
+      className="h-[400px] w-full rounded-lg sm:h-[670px]"
+    />
+  );
 }
