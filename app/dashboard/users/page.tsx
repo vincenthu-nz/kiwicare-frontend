@@ -7,7 +7,6 @@ import { Suspense } from 'react';
 import { UsersTableSkeleton } from '@/app/ui/skeletons';
 import UserTable from '@/app/ui/users/table';
 import RoleFilter from '@/app/ui/users/RoleFilter';
-import { notFound } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Users | KiwiCare Dashboard',
@@ -17,10 +16,6 @@ export default async function Page({ searchParams }: { searchParams?: any }) {
   const query = searchParams?.query ?? '';
   const currentPage = Number(searchParams?.page) || 1;
   const role = searchParams?.role ?? '';
-
-  if (!query) {
-    notFound();
-  }
 
   const totalPages = await fetchUsersPages(query);
 
