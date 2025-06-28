@@ -28,7 +28,7 @@ export function ConfirmModal({
             static
             open={isOpen}
             onClose={() => setIsOpen(false)}
-            className="fixed inset-0 z-50 flex items-center justify-center"
+            className="fixed inset-0 z-50 flex items-center justify-center pl-10 pr-10"
           >
             <motion.div
               className="fixed inset-0 bg-black/30"

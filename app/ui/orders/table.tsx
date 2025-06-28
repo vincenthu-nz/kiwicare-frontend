@@ -47,7 +47,7 @@ export default async function OrdersTable({
                     alt={`${order.customer_name}'s profile picture`}
                   />
                   <p className="flex items-center">
-                    Customer: {order.customer_name}
+                    {order.customer_name}
                     {order.customer_id === currentUserId && (
                       <span className="ml-1 text-sm font-semibold">(You)</span>
                     )}
@@ -64,7 +64,7 @@ export default async function OrdersTable({
                     alt={`${order.provider_name}'s profile picture`}
                   />
                   <p className="flex items-center text-base text-gray-900">
-                    Provider: {order.provider_name}
+                    {order.provider_name}
                     {order.provider_id === currentUserId && (
                       <span className="ml-1 text-sm font-semibold text-gray-500">
                         (You)

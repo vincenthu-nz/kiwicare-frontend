@@ -39,15 +39,20 @@ export default async function UserTable({
                   />
                   <p>
                     {user.name}{' '}
-                    {user.id === currentUserId && (
+                    {user.user_id === currentUserId && (
                       <span className="font-semibold">(You)</span>
                     )}
                   </p>
                 </div>
                 <p className="text-sm text-gray-500">{user.email}</p>
               </div>
+              <UserStatus status={user.status} />
             </div>
             <div className="flex w-full items-center justify-between pt-4">
+              <div>
+                <div className="h-6 w-16 rounded">{user.city}</div>
+                <div className="mt-2 h-6 w-24 rounded">{user.role}</div>
+              </div>
               <div className="flex justify-end gap-2">
                 <EditUserStatus
                   id={user.id}

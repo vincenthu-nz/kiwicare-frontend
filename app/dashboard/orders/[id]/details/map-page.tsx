@@ -35,7 +35,18 @@ export default function ClientMapPage({ order }: { order: OrdersTable }) {
             }
           />
           <Info
-            label="Est. Fee (Service + Travel)"
+            label={
+              <>
+                <span className="block md:hidden">
+                  Est. Fee
+                  <br />
+                  (Service + Travel)
+                </span>
+                <span className="hidden md:inline">
+                  Est. Fee (Service + Travel)
+                </span>
+              </>
+            }
             value={
               distanceKm !== null ? (
                 <span>
@@ -58,12 +69,13 @@ export default function ClientMapPage({ order }: { order: OrdersTable }) {
   );
 }
 
-interface InfoProps {
-  label: string;
+function Info({
+  label,
+  value,
+}: {
+  label: string | React.ReactNode;
   value: string | React.ReactNode;
-}
-
-function Info({ label, value }: InfoProps): React.ReactElement {
+}): React.ReactElement {
   return (
     <div>
       <p className="text-sm text-gray-500">{label}</p>

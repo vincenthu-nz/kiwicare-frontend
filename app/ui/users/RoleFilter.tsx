@@ -34,7 +34,7 @@ export default function RoleFilter({
   ];
 
   return (
-    <div className="mt-2 flex flex-wrap gap-2 md:mt-5">
+    <div className="mt-2 flex flex-wrap justify-between md:mt-5 md:justify-start">
       {roles.map(({ label, value, icon: Icon }) => {
         const params = new URLSearchParams(searchParams.toString());
 

@@ -1,13 +1,13 @@
 'use client';
 
-import { Menu } from '@headlessui/react';
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import {
   CheckIcon,
   ChevronDownIcon,
   ClockIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { JSX, useTransition } from 'react';
+import { JSX } from 'react';
 import { Role, UserStatus } from '@/app/lib/definitions';
 import { updateUserStatus } from '@/app/lib/data';
 
@@ -53,30 +53,26 @@ export function EditUserStatus({
 
   const filteredItems = availableItems.filter((item) => item.key !== status);
 
-  const [isPending, startTransition] = useTransition();
-
-  const handleClick = (newStatus: UserStatus) => {
+  const handleClick = async (newStatus: UserStatus) => {
     const formData = new FormData();
     formData.append('status', newStatus);
 
-    startTransition(() => {
-      updateUserStatus(id, { message: null, errors: {} }, formData);
-    });
+    await updateUserStatus(id, { message: null, errors: {} }, formData);
   };
 
   return (
-    <Menu as="div" className="relative inline-block text-left">
-      <Menu.Button className="flex items-center justify-center rounded-md border border-gray-300 bg-white p-2 hover:bg-gray-100 focus:outline-none">
+    <Menu as="div" className="relative z-50 inline-block text-left">
+      <MenuButton className="flex items-center justify-center rounded-md border border-gray-300 bg-white p-2 hover:bg-gray-100 focus:outline-none">
         <ChevronDownIcon className="h-4 w-4" />
-      </Menu.Button>
+      </MenuButton>
 
-      <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
+      <MenuItems className="absolute right-0 z-10 mt-2 w-40 origin-top-right overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
         <div>
           {filteredItems.map((item, index) => (
             <div key={item.key}>
               {index > 0 && <div className="mx-6 my-1 h-px bg-gray-100" />}
 
-              <Menu.Item>
+              <MenuItem>
                 {({ active }) => (
                   <button
                     type="button"
@@ -89,11 +85,11 @@ export function EditUserStatus({
                     {item.label}
                   </button>
                 )}
-              </Menu.Item>
+              </MenuItem>
             </div>
           ))}
         </div>
-      </Menu.Items>
+      </MenuItems>
     </Menu>
   );
 }
