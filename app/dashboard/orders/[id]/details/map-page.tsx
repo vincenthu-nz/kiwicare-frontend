@@ -35,7 +35,7 @@ export default function ClientMapPage({ order }: { order: OrdersTable }) {
             }
           />
           <Info
-            label="Estimated Fee (Service + Travel)"
+            label="Est. Fee (Service + Travel)"
             value={
               distanceKm !== null ? (
                 <span>
