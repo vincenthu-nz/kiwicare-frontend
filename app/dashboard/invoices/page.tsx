@@ -9,7 +9,7 @@ import { Suspense } from 'react';
 import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
 
 export const metadata: Metadata = {
-  title: 'Invoices | KiwiCare Dashboard',
+  title: 'Invoices',
 };
 
 export default async function Page(props: any) {

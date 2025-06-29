@@ -9,7 +9,7 @@ import UserTable from '@/app/ui/users/table';
 import RoleFilter from '@/app/ui/users/RoleFilter';
 
 export const metadata: Metadata = {
-  title: 'Users | KiwiCare Dashboard',
+  title: 'Users',
 };
 
 export default async function Page({ searchParams }: { searchParams?: any }) {

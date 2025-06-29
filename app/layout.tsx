@@ -5,11 +5,12 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | KiwiCare Dashboard',
-    default: 'KiwiCare Dashboard',
+    template: '%s | KiwiCare',
+    default: 'Dashboard | KiwiCare',
   },
-  description: 'The official Next.js Learn Dashboard built with App Router.',
-  metadataBase: new URL('https://next-learn-dashboard.vercel.sh'),
+  description:
+    'Your trusted platform for connecting providers and customers across New Zealand.',
+  metadataBase: new URL('https://kiwicare.vercel.app'),
 };
 
 export default function RootLayout({
@@ -20,7 +21,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>Next.js</title>
+        <title>KiwiCare</title>
+        <link rel="apple-touch-icon" href="/kiwicare-black.png" />
       </head>
       <body>
         {children}

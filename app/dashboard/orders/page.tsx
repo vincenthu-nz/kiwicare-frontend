@@ -8,7 +8,7 @@ import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
 import OrdersTable from '@/app/ui/orders/table';
 
 export const metadata: Metadata = {
-  title: 'Orders | KiwiCare Dashboard',
+  title: 'Orders',
 };
 
 export default async function Page({ searchParams }: any) {
