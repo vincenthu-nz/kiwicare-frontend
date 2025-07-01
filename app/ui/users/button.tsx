@@ -61,12 +61,12 @@ export function EditUserStatus({
   };
 
   return (
-    <Menu as="div" className="relative z-50 inline-block text-left">
+    <Menu as="div" className="relative z-20 inline-block text-left">
       <MenuButton className="flex items-center justify-center rounded-md border border-gray-300 bg-white p-2 hover:bg-gray-100 focus:outline-none">
         <ChevronDownIcon className="h-4 w-4" />
       </MenuButton>
 
-      <MenuItems className="absolute right-0 z-10 mt-2 w-40 origin-top-right overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
+      <MenuItems className="absolute right-0 z-20 mt-2 w-40 origin-top-right overflow-hidden rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
         <div>
           {filteredItems.map((item, index) => (
             <div key={item.key}>
