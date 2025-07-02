@@ -105,3 +105,41 @@ export async function authenticate(
     throw error;
   }
 }
+
+export async function verifyEmailByToken(token: string) {
+  if (!token) {
+    return { status: 'error', message: 'No token provided.' };
+  }
+
+  const result = await sql`
+    SELECT *
+    FROM pending_users
+    WHERE token = ${token}
+    LIMIT 1
+  `;
+  const pendingUser = result[0];
+
+  if (!pendingUser) {
+    return {
+      status: 'error',
+      message: 'Invalid or expired verification link.',
+    };
+  }
+
+  if (pendingUser.expires_at < new Date()) {
+    return { status: 'error', message: 'This verification link has expired.' };
+  }
+
+  await sql`
+    INSERT INTO users (email, password, first_name, last_name)
+    VALUES (${pendingUser.email}, ${pendingUser.password}, ${pendingUser.first_name}, ${pendingUser.last_name})
+  `;
+
+  await sql`
+    DELETE
+    FROM pending_users
+    WHERE email = ${pendingUser.email}
+  `;
+
+  return { status: 'success', email: pendingUser.email };
+}

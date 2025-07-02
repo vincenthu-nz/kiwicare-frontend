@@ -260,11 +260,11 @@ CREATE TABLE IF NOT EXISTS user_devices
 -- PENDING_USERS
 CREATE TABLE pending_users
 (
-  email         TEXT PRIMARY KEY,
-  password_hash TEXT,
-  first_name    VARCHAR(100),
-  last_name     VARCHAR(100),
-  verify_token  TEXT,
-  created_at    TIMESTAMPTZ,
-  expires_at    TIMESTAMPTZ
+  email      TEXT PRIMARY KEY,
+  password   TEXT,
+  first_name VARCHAR(100),
+  last_name  VARCHAR(100),
+  token      TEXT,
+  created_at TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ
 );
