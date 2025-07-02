@@ -13,106 +13,104 @@ import {
 } from '../lib/placeholder-data';
 
 async function createEnums() {
-  await sql.begin(async (sql) => [
-    sql`
-      DO
-      $$
-        BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
-            CREATE TYPE user_role AS ENUM ('customer', 'provider', 'admin');
-          END IF;
-        END
-      $$;
-    `,
+  await sql`
+    DO
+    $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+          CREATE TYPE user_role AS ENUM ('customer', 'provider', 'admin');
+        END IF;
+      END
+    $$;
+  `;
 
-    sql`
-      DO
-      $$
-        BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_status') THEN
-            CREATE TYPE user_status AS ENUM ('pending', 'active', 'banned');
-          END IF;
-        END
-      $$;
-    `,
+  await sql`
+    DO
+    $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_status') THEN
+          CREATE TYPE user_status AS ENUM ('pending', 'active', 'banned');
+        END IF;
+      END
+    $$;
+  `;
 
-    sql`
-      DO
-      $$
-        BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'gender_type') THEN
-            CREATE TYPE gender_type AS ENUM ('male', 'female', 'gender diverse', 'prefer not to say');
-          END IF;
-        END
-      $$;
-    `,
+  await sql`
+    DO
+    $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'gender_type') THEN
+        CREATE TYPE gender_type AS ENUM ('male', 'female', 'gender diverse', 'prefer not to say');
+      END IF;
+    END
+    $$;
+  `;
 
-    sql`
-      DO
-      $$
-        BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_method') THEN
-            CREATE TYPE payment_method AS ENUM ('credit_card', 'bank_transfer', 'cash', 'other');
-          END IF;
-        END
-      $$;
-    `,
+  await sql`
+    DO
+    $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_method') THEN
+        CREATE TYPE payment_method AS ENUM ('credit_card', 'bank_transfer', 'cash', 'other');
+      END IF;
+    END
+    $$;
+  `;
 
-    sql`
-      DO
-      $$
-        BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_status') THEN
-            CREATE TYPE invoice_status AS ENUM ('pending', 'paid', 'refunded', 'cancelled');
-          END IF;
-        END
-      $$;
-    `,
+  await sql`
+    DO
+    $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_status') THEN
+        CREATE TYPE invoice_status AS ENUM ('pending', 'paid', 'refunded', 'cancelled');
+      END IF;
+    END
+    $$;
+  `;
 
-    sql`
-      DO
-      $$
-        BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_source') THEN
-            CREATE TYPE invoice_source AS ENUM ('order', 'manual', 'system', 'admin');
-          END IF;
-        END
-      $$;
-    `,
+  await sql`
+    DO
+    $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_source') THEN
+          CREATE TYPE invoice_source AS ENUM ('order', 'manual', 'system', 'admin');
+        END IF;
+      END
+    $$;
+  `;
 
-    sql`
-      DO
-      $$
-        BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_type') THEN
-            CREATE TYPE notification_type AS ENUM ('push', 'email', 'sms');
-          END IF;
-        END
-      $$;
-    `,
+  await sql`
+    DO
+    $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_type') THEN
+        CREATE TYPE notification_type AS ENUM ('push', 'email', 'sms');
+      END IF;
+    END
+    $$;
+  `;
 
-    sql`
-      DO
-      $$
-        BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'device_type') THEN
-            CREATE TYPE device_type AS ENUM ('iOS', 'Android');
-          END IF;
-        END
-      $$;
-    `,
+  await sql`
+    DO
+    $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'device_type') THEN
+          CREATE TYPE device_type AS ENUM ('iOS', 'Android');
+        END IF;
+      END
+    $$;
+  `;
 
-    sql`
-      DO
-      $$
-        BEGIN
-          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status') THEN
-            CREATE TYPE order_status AS ENUM ('pending', 'accepted', 'in_progress', 'completed', 'cancelled', 'rejected');
-          END IF;
-        END
-      $$;
-    `,
-  ]);
+  await sql`
+    DO
+    $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status') THEN
+        CREATE TYPE order_status AS ENUM ('pending', 'accepted', 'in_progress', 'completed', 'cancelled', 'rejected');
+      END IF;
+    END
+    $$;
+  `;
 }
 
 async function seedUsers() {
@@ -518,6 +516,16 @@ async function resetAllTables() {
     await sql`DROP TABLE IF EXISTS customers CASCADE`;
     await sql`DROP TABLE IF EXISTS revenue CASCADE`;
     await sql`DROP TABLE IF EXISTS users CASCADE`;
+
+    await sql`DROP TYPE IF EXISTS user_role CASCADE`;
+    await sql`DROP TYPE IF EXISTS user_status CASCADE`;
+    await sql`DROP TYPE IF EXISTS gender_type CASCADE`;
+    await sql`DROP TYPE IF EXISTS payment_method CASCADE`;
+    await sql`DROP TYPE IF EXISTS invoice_status CASCADE`;
+    await sql`DROP TYPE IF EXISTS invoice_source CASCADE`;
+    await sql`DROP TYPE IF EXISTS notification_type CASCADE`;
+    await sql`DROP TYPE IF EXISTS device_type CASCADE`;
+    await sql`DROP TYPE IF EXISTS order_status CASCADE`;
   });
 
   console.log('All tables dropped successfully.');
@@ -531,17 +539,17 @@ export async function GET() {
   try {
     await createEnums();
 
-    await sql.begin(async () => [
-      await seedUsers(),
-      await seedCustomers(),
-      await seedProvider(),
-      await seedService(),
-      await seedProviderService(),
-      await seedOrders(),
-      await seedInvoices(),
-      await seedNotification(),
-      await seedUserDevice(),
-    ]);
+    await sql.begin(async (sql) => {
+      await seedUsers();
+      await seedCustomers();
+      await seedProvider();
+      await seedService();
+      await seedProviderService();
+      await seedOrders();
+      await seedInvoices();
+      await seedNotification();
+      await seedUserDevice();
+    });
 
     return Response.json({ message: 'Database seeded successfully' });
   } catch (error) {
