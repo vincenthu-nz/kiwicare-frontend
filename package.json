@@ -7,22 +7,17 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@auth/core": "latest",
     "@headlessui/react": "latest",
     "@heroicons/react": "latest",
-    "@mapbox/mapbox-gl-directions": "latest",
     "@tailwindcss/forms": "latest",
     "@vercel/analytics": "latest",
     "autoprefixer": "latest",
     "bcrypt": "latest",
     "clsx": "latest",
     "framer-motion": "latest",
-    "geojson": "latest",
-    "glob": "latest",
     "mapbox-gl": "latest",
     "next": "latest",
     "next-auth": "5.0.0-beta.25",
-    "postcss": "latest",
     "postgres": "latest",
     "react": "latest",
     "react-dom": "latest",
@@ -31,13 +26,7 @@
   },
   "devDependencies": {
     "@types/bcrypt": "latest",
-    "@types/geojson": "latest",
-    "@types/node": "latest",
     "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "eslint-config-next": "latest",
-    "prettier": "latest",
-    "prettier-plugin-tailwindcss": "latest",
     "tailwindcss": "3.4.17",
     "typescript": "latest"
   }

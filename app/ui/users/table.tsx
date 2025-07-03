@@ -1,9 +1,9 @@
-import Image from 'next/image';
 import { fetchFilteredUsers } from '@/app/lib/data';
 import UserStatus from '@/app/ui/users/status';
 import EmptyState from '@/app/ui/empty-state';
 import { EditUserStatus } from '@/app/ui/users/button';
 import { getCurrentUserId } from '@/auth_token';
+import Avatar from '@/app/ui/avatar';
 
 export default async function UserTable({
   query,
@@ -30,7 +30,7 @@ export default async function UserTable({
             <div className="flex items-center justify-between border-b pb-4">
               <div>
                 <div className="mb-2 flex items-center">
-                  <Image
+                  <Avatar
                     src={user.avatar}
                     className="mr-2 rounded-full"
                     width={28}
@@ -95,7 +95,7 @@ export default async function UserTable({
             >
               <td className="whitespace-nowrap py-3 pl-6 pr-3">
                 <div className="flex items-center gap-3">
-                  <Image
+                  <Avatar
                     src={user.avatar}
                     className="rounded-full"
                     width={28}
@@ -111,7 +111,9 @@ export default async function UserTable({
                 </div>
               </td>
               <td className="whitespace-nowrap px-3 py-3">{user.email}</td>
-              <td className="whitespace-nowrap px-3 py-3">{user.city}</td>
+              <td className="whitespace-nowrap px-3 py-3">
+                {user.city || '-'}
+              </td>
               <td className="whitespace-nowrap px-3 py-3">{user.role}</td>
               <td className="whitespace-nowrap px-3 py-3">
                 <UserStatus status={user.status} />

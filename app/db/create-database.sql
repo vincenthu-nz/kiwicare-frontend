@@ -265,6 +265,6 @@ CREATE TABLE pending_users
   first_name VARCHAR(100),
   last_name  VARCHAR(100),
   token      TEXT,
-  created_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
   expires_at TIMESTAMPTZ
 );

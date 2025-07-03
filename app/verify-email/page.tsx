@@ -2,18 +2,14 @@ import { verifyEmailByToken } from '../lib/actions';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: { token?: string };
-}) {
+export default async function Page({ searchParams }: { searchParams?: any }) {
   const token = searchParams?.token ?? '';
 
   let result;
-  if (!token) {
-    result = { status: 'error', message: 'No verification token provided.' };
-  } else {
+  if (token) {
     result = await verifyEmailByToken(token);
+  } else {
+    result = { status: 'error', message: 'No verification token provided.' };
   }
 
   const isSuccess = result.status === 'success';
