@@ -1,14 +1,13 @@
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
-import Image from 'next/image';
 import { lusitana } from '@/app/ui/fonts';
 import { fetchLatestInvoices } from '@/app/lib/data';
 import { Button } from '@/app/ui/button';
 import { ArrowRightIcon } from '@heroicons/react/20/solid';
 import Link from 'next/link';
+import Avatar from "@/app/ui/avatar";
 
 export default async function LatestInvoices() {
-  // Remove props
   const latestInvoices = await fetchLatestInvoices();
 
   return (
@@ -27,7 +26,7 @@ export default async function LatestInvoices() {
                 })}
               >
                 <div className="flex items-center">
-                  <Image
+                  <Avatar
                     src={invoice.avatar}
                     alt={`${invoice.name}'s profile picture`}
                     className="mr-4 rounded-full"
@@ -54,13 +53,13 @@ export default async function LatestInvoices() {
         </div>
         <div className="flex justify-between">
           <div className="flex items-center pb-2 pt-6">
-            <ArrowPathIcon className="h-5 w-5 text-gray-500" />
+            <ArrowPathIcon className="h-5 w-5 text-gray-500"/>
             <h3 className="ml-2 text-sm text-gray-500">Updated just now</h3>
           </div>
 
           <Link href="/dashboard/invoices">
             <Button className="mt-4">
-              More <ArrowRightIcon className="ml-2 h-5 w-5 text-gray-50" />
+              More <ArrowRightIcon className="ml-2 h-5 w-5 text-gray-50"/>
             </Button>
           </Link>
         </div>
