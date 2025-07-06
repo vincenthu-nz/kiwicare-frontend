@@ -19,10 +19,10 @@ import { getCurrentUserId } from '@/auth_token';
 const ITEMS_PER_PAGE = 6;
 
 export async function fetchRevenue(): Promise<
-  { month: string; revenue: number }[]
+  {month: string; revenue: number}[]
 > {
   try {
-    const data = await sql<(Revenue & { month: string })[]>`
+    const data = await sql<(Revenue & {month: string})[]>`
       SELECT TO_CHAR(DATE_TRUNC('month', date), 'Mon') AS month,
              SUM(amount)                               AS revenue
       FROM invoices
@@ -275,7 +275,7 @@ export async function updateUserStatus(
     };
   }
 
-  const result = await sql<{ status: UserStatus }[]>`
+  const result = await sql<{status: UserStatus}[]>`
     SELECT status
     FROM users
     WHERE id = ${id}
@@ -335,38 +335,40 @@ export async function fetchFilteredOrders(
   try {
     const data = await sql<OrdersTable[]>`
       SELECT orders.id,
-             c.id                AS customer_id,
-             c.name              AS customer_name,
-             c.avatar            AS customer_avatar,
-             customers.location  AS customer_location,
-             customers.latitude  AS customer_latitude,
-             customers.longitude AS customer_longitude,
-             p.id                AS provider_id,
-             p.name              AS provider_name,
-             p.avatar            AS provider_avatar,
-             providers.location  AS provider_location,
-             providers.latitude  AS provider_latitude,
-             providers.longitude AS provider_longitude,
-             services.name       AS service,
-             invoices.amount,
-             invoices.date,
-             orders.status
+             c.id                     AS customer_id,
+             c.name                   AS customer_name,
+             c.avatar                 AS customer_avatar,
+             orders.service_address   AS customer_address,
+             orders.service_latitude  AS customer_latitude,
+             orders.service_longitude AS customer_longitude,
+             p.id                     AS provider_id,
+             p.name                   AS provider_name,
+             p.avatar                 AS provider_avatar,
+             providers.base_address   AS provider_address,
+             providers.base_latitude  AS provider_latitude,
+             providers.base_longitude AS provider_longitude,
+             services.name            AS service,
+             orders.status,
+             orders.route_geometry,
+             orders.distance_m,
+             orders.service_fee,
+             orders.travel_fee,
+             orders.total_amount,
+             orders.created_at        AS date
       FROM orders
              LEFT JOIN customers ON orders.customer_id = customers.id
              LEFT JOIN users AS c ON customers.user_id = c.id
              LEFT JOIN providers ON orders.provider_id = providers.id
              LEFT JOIN users AS p ON providers.user_id = p.id
              LEFT JOIN services ON orders.service_id = services.id
-             LEFT JOIN invoices ON invoices.order_id = orders.id
       WHERE c.name ILIKE ${`%${query}%`}
          OR c.email ILIKE ${`%${query}%`}
          OR p.name ILIKE ${`%${query}%`}
          OR p.email ILIKE ${`%${query}%`}
          OR services.name ILIKE ${`%${query}%`}
-         OR invoices.amount::text ILIKE ${`%${query}%`}
-         OR invoices.date::text ILIKE ${`%${query}%`}
-         OR orders.status::text ILIKE ${`%${query}%`}
-      ORDER BY invoices.date DESC
+         OR orders.total_amount::text ILIKE ${`%${query}%`}
+         OR orders.created_at::text ILIKE ${`%${query}%`}
+      ORDER BY orders.created_at DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
     `;
 
@@ -381,21 +383,25 @@ export async function fetchOrderById(id: string) {
   try {
     const data = await sql<OrdersTable[]>`
       SELECT orders.id,
-             c.id                AS customer_id,
-             c.name              AS customer_name,
-             c.avatar            AS customer_avatar,
-             customers.location  AS customer_location,
-             customers.latitude  AS customer_latitude,
-             customers.longitude AS customer_longitude,
-             p.id                AS provider_id,
-             p.name              AS provider_name,
-             p.avatar            AS provider_avatar,
-             providers.location  AS provider_location,
-             providers.latitude  AS provider_latitude,
-             providers.longitude AS provider_longitude,
-             services.name       AS service,
-             invoices.amount,
-             orders.created_at   AS date,
+             c.id                     AS customer_id,
+             c.name                   AS customer_name,
+             c.avatar                 AS customer_avatar,
+             orders.service_address   AS customer_address,
+             orders.service_latitude  AS customer_latitude,
+             orders.service_longitude AS customer_longitude,
+             p.id                     AS provider_id,
+             p.name                   AS provider_name,
+             p.avatar                 AS provider_avatar,
+             providers.base_address   AS provider_address,
+             providers.base_latitude  AS provider_latitude,
+             providers.base_longitude AS provider_longitude,
+             services.name            AS service,
+             orders.distance_m,
+             orders.service_fee,
+             orders.travel_fee,
+             orders.total_amount,
+             orders.created_at        AS date,
+             orders.route_geometry,
              orders.status
       FROM orders
              LEFT JOIN customers ON orders.customer_id = customers.id
@@ -403,10 +409,8 @@ export async function fetchOrderById(id: string) {
              LEFT JOIN providers ON orders.provider_id = providers.id
              LEFT JOIN users AS p ON providers.user_id = p.id
              LEFT JOIN services ON orders.service_id = services.id
-             LEFT JOIN invoices ON invoices.order_id = orders.id
       WHERE orders.id = ${id}
     `;
-
     return data[0];
   } catch (error) {
     console.error('Database Error:', error);

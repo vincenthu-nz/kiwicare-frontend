@@ -1,3 +1,5 @@
+import { LineString } from "geojson";
+
 export enum UserStatus {
   ACTIVE = 'active',
   PENDING = 'pending',
@@ -85,18 +87,22 @@ export type OrdersTable = {
   customer_id: string;
   customer_avatar: string;
   customer_name: string;
-  customer_location: string;
+  customer_address: string;
   customer_longitude: number;
   customer_latitude: number;
   provider_id: string;
   provider_avatar: string;
   provider_name: string;
-  provider_location: string;
+  distance_m: number;
+  service_fee: number;
+  travel_fee: number;
+  provider_address: string;
   provider_longitude: number;
   provider_latitude: number;
+  route_geometry: LineString;
   service: string;
   date: string;
-  amount: number;
+  total_amount: number;
   status:
     | 'pending'
     | 'accepted'

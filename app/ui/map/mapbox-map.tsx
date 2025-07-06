@@ -4,16 +4,16 @@ import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { OrdersTable } from '@/app/lib/definitions';
+import { GeoJSON } from "geojson";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!;
 
-export default function MapboxMap({
-  order,
-  onDistanceCalculated,
-}: {
-  order: OrdersTable;
-  onDistanceCalculated?: (distanceInKm: number) => void;
-}) {
+export default function MapboxMap(
+  {
+    order,
+  }: {
+    order: OrdersTable;
+  }) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
@@ -56,7 +56,8 @@ export default function MapboxMap({
       avatar.style.backgroundSize = 'cover';
       avatar.style.boxShadow = '0 0 0 2px white';
 
-      avatar.addEventListener('click', () => {});
+      avatar.addEventListener('click', () => {
+      });
 
       const label = document.createElement('div');
       label.innerText = name;
@@ -79,28 +80,27 @@ export default function MapboxMap({
       addCustomMarker(origin, order.customer_avatar, order.customer_name);
       addCustomMarker(destination, order.provider_avatar, order.provider_name);
 
-      const query = await fetch(
-        `https://api.mapbox.com/directions/v5/mapbox/driving/${origin.join(',')};${destination.join(',')}?geometries=geojson&access_token=${mapboxgl.accessToken}`,
-      );
+      let routeGeoJson = order.route_geometry;
 
-      const json = await query.json();
-      const route = json.routes?.[0];
+      // If no stored route exists → call the Directions API to generate one.
+      if (!routeGeoJson) {
+        const query = await fetch(
+          `https://api.mapbox.com/directions/v5/mapbox/driving/${origin.join(',')};${destination.join(',')}?geometries=geojson&access_token=${mapboxgl.accessToken}`
+        );
+        const json = await query.json();
+        const route = json.routes?.[0];
 
-      if (
-        !route?.geometry ||
-        !route?.geometry.coordinates ||
-        !route?.distance
-      ) {
-        console.warn('Route geometry missing');
-        return;
+        if (!route?.geometry || !route?.geometry.coordinates) {
+          console.warn('Route geometry missing');
+          return;
+        }
+
+        routeGeoJson = route.geometry;
       }
-
-      const distanceInKm = route.distance / 1000;
-      onDistanceCalculated?.(distanceInKm);
 
       const geojson: GeoJSON.Feature = {
         type: 'Feature',
-        geometry: route.geometry,
+        geometry: routeGeoJson,
         properties: {},
       };
 
@@ -138,8 +138,8 @@ export default function MapboxMap({
       });
 
       const bounds = new mapboxgl.LngLatBounds(origin, origin);
-      route.geometry.coordinates.forEach((coord: [number, number]) =>
-        bounds.extend(coord),
+      routeGeoJson.coordinates.forEach((coord) =>
+        bounds.extend(coord as [number, number]),
       );
       map.fitBounds(bounds, { padding: 60 });
     });

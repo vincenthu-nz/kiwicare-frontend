@@ -125,7 +125,6 @@ $$
 $$;
 
 
--- USERS table
 CREATE TABLE IF NOT EXISTS users
 (
   id             UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -149,14 +148,14 @@ CREATE TABLE IF NOT EXISTS users
   is_deleted     BOOLEAN     DEFAULT FALSE
 );
 
--- CUSTOMERS
+
 CREATE TABLE IF NOT EXISTS customers
 (
   id                      UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id                 UUID NOT NULL UNIQUE REFERENCES users (id) ON DELETE CASCADE,
-  location                VARCHAR(255),
-  latitude                DOUBLE PRECISION,
-  longitude               DOUBLE PRECISION,
+  default_address         VARCHAR(255),
+  default_latitude        DOUBLE PRECISION,
+  default_longitude       DOUBLE PRECISION,
   note                    TEXT,
   is_disabled             BOOLEAN     DEFAULT FALSE,
   emergency_contact_name  VARCHAR(100),
@@ -165,22 +164,22 @@ CREATE TABLE IF NOT EXISTS customers
   updated_at              TIMESTAMPTZ DEFAULT now()
 );
 
--- PROVIDERS
+
 CREATE TABLE IF NOT EXISTS providers
 (
-  id             UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
-  user_id        UUID NOT NULL UNIQUE REFERENCES users (id) ON DELETE CASCADE,
-  license_number VARCHAR(50) UNIQUE,
-  service_radius INTEGER     DEFAULT 10 CHECK (service_radius >= 0),
-  location       VARCHAR(50),
-  latitude       DOUBLE PRECISION,
-  longitude      DOUBLE PRECISION,
-  bio            TEXT,
-  created_at     TIMESTAMPTZ DEFAULT now(),
-  updated_at     TIMESTAMPTZ DEFAULT now()
+  id                UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id           UUID NOT NULL UNIQUE REFERENCES users (id) ON DELETE CASCADE,
+  license_number    VARCHAR(50) UNIQUE,
+  service_radius_km INTEGER     DEFAULT 10 CHECK (service_radius_km >= 0),
+  base_address      VARCHAR(50),
+  base_latitude     DOUBLE PRECISION,
+  base_longitude    DOUBLE PRECISION,
+  bio               TEXT,
+  created_at        TIMESTAMPTZ DEFAULT now(),
+  updated_at        TIMESTAMPTZ DEFAULT now()
 );
 
--- SERVICES
+
 CREATE TABLE IF NOT EXISTS services
 (
   id          UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -192,7 +191,7 @@ CREATE TABLE IF NOT EXISTS services
   updated_at  TIMESTAMPTZ DEFAULT now()
 );
 
--- PROVIDER_SERVICES
+
 CREATE TABLE IF NOT EXISTS provider_services
 (
   id               UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -204,19 +203,29 @@ CREATE TABLE IF NOT EXISTS provider_services
   UNIQUE (provider_id, service_id)
 );
 
--- ORDERS
+
 CREATE TABLE IF NOT EXISTS orders
 (
-  id              UUID         DEFAULT uuid_generate_v4() PRIMARY KEY,
-  customer_id     UUID        NOT NULL REFERENCES customers (id) ON DELETE CASCADE,
-  provider_id     UUID        NOT NULL REFERENCES providers (id) ON DELETE CASCADE,
-  service_id      UUID        NOT NULL REFERENCES services (id) ON DELETE RESTRICT,
-  scheduled_start TIMESTAMPTZ NOT NULL,
-  status          order_status DEFAULT 'pending',
-  created_at      TIMESTAMPTZ  DEFAULT now()
+  id                UUID         DEFAULT uuid_generate_v4() PRIMARY KEY,
+  customer_id       UUID             NOT NULL REFERENCES customers (id) ON DELETE CASCADE,
+  provider_id       UUID             NOT NULL REFERENCES providers (id) ON DELETE CASCADE,
+  service_id        UUID             NOT NULL REFERENCES services (id) ON DELETE RESTRICT,
+  service_address   TEXT             NOT NULL,
+  service_latitude  DOUBLE PRECISION NOT NULL,
+  service_longitude DOUBLE PRECISION NOT NULL,
+  distance_m        INTEGER          NOT NULL,
+  service_fee       NUMERIC(10, 2)   NOT NULL CHECK (service_fee >= 0),
+  travel_fee        NUMERIC(10, 2)   NOT NULL CHECK (travel_fee >= 0),
+  total_amount      NUMERIC(10, 2)   NOT NULL,
+  duration_s        INTEGER          NOT NULL,
+  route_geometry    JSONB            NOT NULL,
+  scheduled_start   TIMESTAMPTZ      NOT NULL,
+  status            order_status DEFAULT 'pending',
+  note              TEXT,
+  created_at        TIMESTAMPTZ  DEFAULT now()
 );
 
--- INVOICES
+
 CREATE TABLE IF NOT EXISTS invoices
 (
   id             UUID           DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -234,7 +243,7 @@ CREATE TABLE IF NOT EXISTS invoices
   source         invoice_source DEFAULT 'order'
 );
 
--- NOTIFICATIONS
+
 CREATE TABLE IF NOT EXISTS notifications
 (
   id      UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -246,7 +255,7 @@ CREATE TABLE IF NOT EXISTS notifications
   type    notification_type NOT NULL
 );
 
--- USER_DEVICES
+
 CREATE TABLE IF NOT EXISTS user_devices
 (
   id           UUID        DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -257,7 +266,7 @@ CREATE TABLE IF NOT EXISTS user_devices
   created_at   TIMESTAMPTZ DEFAULT now()
 );
 
--- PENDING_USERS
+
 CREATE TABLE pending_users
 (
   email      TEXT PRIMARY KEY,
