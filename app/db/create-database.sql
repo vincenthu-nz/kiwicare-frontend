@@ -33,7 +33,8 @@ $$
       invoice_source,
       notification_type,
       device_type,
-      order_status
+      order_status,
+      closureType
     CASCADE
   ';
   END
@@ -120,6 +121,15 @@ $$
   BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status') THEN
       CREATE TYPE order_status AS ENUM ('pending', 'accepted', 'in_progress', 'completed', 'cancelled', 'rejected');
+    END IF;
+  END
+$$;
+
+DO
+$$
+  BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'closureType') THEN
+      CREATE TYPE closureType AS ENUM ('cancel', 'reject');
     END IF;
   END
 $$;
@@ -223,12 +233,13 @@ CREATE TABLE IF NOT EXISTS orders
   status            order_status DEFAULT 'pending',
   note              TEXT,
   created_at        TIMESTAMPTZ  DEFAULT now(),
-  cancelled_by_id   UUID,
-  cancelled_by_role TEXT,
-  cancel_reason     TEXT,
-  cancelled_at      TIMESTAMPTZ
+  closure_type      closureType  DEFAULT 'cancel',
+  closure_by_id     UUID,
+  closure_by_role   TEXT,
+  closure_reason    TEXT,
+  closure_at        TIMESTAMPTZ
 );
-COMMENT ON COLUMN orders.cancelled_by_id IS 'user_id of the person who cancelled the order';
+COMMENT ON COLUMN orders.closure_by_id IS 'user_id of the person who cancelled or rejected the order';
 
 
 CREATE TABLE IF NOT EXISTS invoices
