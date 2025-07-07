@@ -5,11 +5,15 @@ import MapboxMap from '@/app/ui/map/mapbox-map';
 import { formatDateTimeToLocal } from '@/app/lib/utils';
 import { OrdersTable } from '@/app/lib/definitions';
 import { lusitana } from '@/app/ui/fonts';
+import OrderStatus from "@/app/ui/orders/status";
 
 export default function ClientMapPage({ order }: {order: OrdersTable}) {
   return (
     <div className="flex w-full flex-col">
-      <h1 className={`${lusitana.className} pb-5 text-2xl`}>Map Route</h1>
+      <div className="flex items-center justify-between pb-5">
+        <h1 className={`${lusitana.className} text-2xl`}>Map Route</h1>
+        <OrderStatus status={order.status}/>
+      </div>
 
       <div className="overflow-hidden rounded-lg border shadow-sm">
         <div className="h-[400px] w-full sm:h-[670px]">

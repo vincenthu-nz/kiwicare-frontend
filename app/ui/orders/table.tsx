@@ -1,18 +1,19 @@
 import Image from 'next/image';
-import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatCurrency, formatDateToLocal } from '@/app/lib/utils';
 import EmptyState from '@/app/ui/empty-state';
 import { getCurrentUserId } from '@/auth_token';
 import { fetchFilteredOrders } from '@/app/lib/data';
 import { Details } from '@/app/ui/orders/details';
+import OrderStatus from "@/app/ui/orders/status";
 
-export default async function OrdersTable({
-                                            query,
-                                            currentPage,
-                                          }: {
-  query: string;
-  currentPage: number;
-}) {
+export default async function OrdersTable(
+  {
+    query,
+    currentPage,
+  }: {
+    query: string;
+    currentPage: number;
+  }) {
   const orders = await fetchFilteredOrders(query, currentPage);
 
   if (orders.length === 0) {
@@ -75,7 +76,7 @@ export default async function OrdersTable({
               </div>
 
               <div className="flex flex-col items-end">
-                <InvoiceStatus status={order.status}/>
+                <OrderStatus status={order.status}/>
               </div>
             </div>
 
@@ -172,7 +173,7 @@ export default async function OrdersTable({
               {formatDateToLocal(order.date)}
             </td>
             <td className="whitespace-nowrap px-3 py-3">
-              <InvoiceStatus status={order.status}/>
+              <OrderStatus status={order.status}/>
             </td>
             <td className="whitespace-nowrap py-3 pl-6 pr-3">
               <div className="flex justify-end gap-3">

@@ -222,8 +222,13 @@ CREATE TABLE IF NOT EXISTS orders
   scheduled_start   TIMESTAMPTZ      NOT NULL,
   status            order_status DEFAULT 'pending',
   note              TEXT,
-  created_at        TIMESTAMPTZ  DEFAULT now()
+  created_at        TIMESTAMPTZ  DEFAULT now(),
+  cancelled_by_id   UUID,
+  cancelled_by_role TEXT,
+  cancel_reason     TEXT,
+  cancelled_at      TIMESTAMPTZ
 );
+COMMENT ON COLUMN orders.cancelled_by_id IS 'user_id of the person who cancelled the order';
 
 
 CREATE TABLE IF NOT EXISTS invoices
