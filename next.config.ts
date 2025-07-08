@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '*.cos.ap-singapore.myqcloud.com',
+        hostname: '*.s3.ap-southeast-2.amazonaws.com',
       },
     ],
   },
