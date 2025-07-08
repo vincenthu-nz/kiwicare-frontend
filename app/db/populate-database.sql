@@ -58,7 +58,8 @@ VALUES ('e5b60c7f-1663-4ed4-a226-299725cbe7ef',
 
 INSERT INTO orders (id, customer_id, provider_id, service_id, scheduled_start, status, created_at,
                     service_address, service_latitude, service_longitude, note,
-                    distance_m, service_fee, travel_fee, total_amount, duration_s, route_geometry)
+                    distance_m, service_fee, travel_fee, total_amount, actual_service_m, drive_duration_s,
+                    route_geometry)
 VALUES ('f7a41952-2213-4d65-98a8-5af6e92e03df',
         '80fb4ebd-c59b-4419-9e7e-bc2a6493eab9',
         '9b6d4d7a-67e9-4c1d-b34e-319de03e7d42',
@@ -66,7 +67,7 @@ VALUES ('f7a41952-2213-4d65-98a8-5af6e92e03df',
         '2025-06-25T10:00:00+12:00',
         'pending', now(),
         'Christchurch Art Gallery', -43.531603, 172.631436, 'Please arrive 15 minutes early.',
-        5240, 524, 12000, 12524, 720,
+        5240, 524, 12000, 12524, 60, 720,
         '{
           "type": "LineString",
           "coordinates": [

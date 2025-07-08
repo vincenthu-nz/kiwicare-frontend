@@ -227,17 +227,25 @@ CREATE TABLE IF NOT EXISTS orders
   service_fee       NUMERIC(10, 2)   NOT NULL CHECK (service_fee >= 0),
   travel_fee        NUMERIC(10, 2)   NOT NULL CHECK (travel_fee >= 0),
   total_amount      NUMERIC(10, 2)   NOT NULL,
-  duration_s        INTEGER          NOT NULL,
+  actual_service_m  INTEGER      DEFAULT 0 CHECK (actual_service_m >= 0),
+  drive_duration_s  INTEGER          NOT NULL,
   route_geometry    JSONB            NOT NULL,
   scheduled_start   TIMESTAMPTZ      NOT NULL,
   status            order_status DEFAULT 'pending',
   note              TEXT,
   created_at        TIMESTAMPTZ  DEFAULT now(),
+  updated_at        TIMESTAMPTZ,
   closure_type      closureType  DEFAULT 'cancel',
   closure_by_id     UUID,
   closure_by_role   TEXT,
   closure_reason    TEXT,
-  closure_at        TIMESTAMPTZ
+  closure_at        TIMESTAMPTZ,
+  started_at        TIMESTAMPTZ,
+  start_latitude    DOUBLE PRECISION,
+  start_longitude   DOUBLE PRECISION,
+  completed_at      TIMESTAMPTZ,
+  completed_latitude DOUBLE PRECISION,
+  completed_longitude DOUBLE PRECISION,
 );
 COMMENT ON COLUMN orders.closure_by_id IS 'user_id of the person who cancelled or rejected the order';
 
