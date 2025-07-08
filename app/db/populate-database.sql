@@ -1,18 +1,18 @@
 INSERT INTO users (id, first_name, last_name, email, password, phone, gender, birthdate,
-                   avatar, city, role, status, email_verified, phone_verified,
+                   avatar, city, blance, role, status, email_verified, phone_verified,
                    last_login_at, created_at, updated_at, is_deleted)
 VALUES ('b0c1e8b6-79c5-4374-927d-6b22fb8a2b11', 'Jason', 'Smiths', 'user@nextmail.com',
         '$2b$10$Xf0Ui5hmiU8De9D2aQe4YugakkaX.BHVDdaK5Y5OfAc/mgwC38W16', '0211234567',
         'female', '1990-05-20', '/customers/evil-rabbit.png', 'Auckland',
-        'customer', 'active', true, true, now(), now(), now(), false),
+        100, 'customer', 'active', true, true, now(), now(), now(), false),
        ('b92a9b2e-4a6f-4a76-9b14-97bb763e6173', 'Delba', 'de Oliveira', 'delba@oliveira.com',
         '$2b$10$Xf0Ui5hmiU8De9D2aQe4YugakkaX.BHVDdaK5Y5OfAc/mgwC38W16', '0278889999',
         'male', '1985-03-12', '/customers/delba-de-oliveira.png', 'Christchurch',
-        'provider', 'active', true, true, now(), now(), now(), false),
+        200, 'provider', 'active', true, true, now(), now(), now(), false),
        ('2f970ba6-d897-4a1a-bc10-d4e9e2a44784', 'Lee', 'Robinson', 'lee@robinson.com',
         '$2b$10$Xf0Ui5hmiU8De9D2aQe4YugakkaX.BHVDdaK5Y5OfAc/mgwC38W16', '0201122334',
         'female', '1980-01-01', '/customers/lee-robinson.png', 'Wellington',
-        'admin', 'active', true, false, now(), now(), now(), false);
+        500, 'admin', 'active', true, false, now(), now(), now(), false);
 
 
 INSERT INTO customers (id, user_id, default_address, default_latitude, default_longitude,
@@ -56,7 +56,7 @@ VALUES ('e5b60c7f-1663-4ed4-a226-299725cbe7ef',
         80.0, 60, 'Swedish massage available weekdays only.');
 
 
-INSERT INTO orders (id, customer_id, provider_id, service_id, scheduled_start, status, created_at,
+INSERT INTO orders (id, customer_id, provider_id, service_id, scheduled_start, status, payment_status, created_at,
                     service_address, service_latitude, service_longitude, note,
                     distance_m, service_fee, travel_fee, total_amount, actual_service_m, drive_duration_s,
                     route_geometry)
@@ -65,7 +65,7 @@ VALUES ('f7a41952-2213-4d65-98a8-5af6e92e03df',
         '9b6d4d7a-67e9-4c1d-b34e-319de03e7d42',
         'de45f2f3-7c98-40e4-8123-0fb1e482c225',
         '2025-06-25T10:00:00+12:00',
-        'pending', now(),
+        'pending', 'unpaid', now(),
         'Christchurch Art Gallery', -43.531603, 172.631436, 'Please arrive 15 minutes early.',
         5240, 524, 12000, 12524, 60, 720,
         '{

@@ -110,6 +110,7 @@ export type OrdersTable = {
     | 'completed'
     | 'cancelled'
     | 'rejected';
+  payment_status: 'paid' | 'unpaid' | 'refunded';
 };
 
 export type CustomersTableType = {

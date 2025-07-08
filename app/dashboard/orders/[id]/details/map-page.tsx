@@ -12,7 +12,7 @@ export default function ClientMapPage({ order }: {order: OrdersTable}) {
     <div className="flex w-full flex-col">
       <div className="flex items-center justify-between pb-5">
         <h1 className={`${lusitana.className} text-2xl`}>Map Route</h1>
-        <OrderStatus status={order.status}/>
+        <OrderStatus status={order.status} paymentStatus={order.payment_status}/>
       </div>
 
       <div className="overflow-hidden rounded-lg border shadow-sm">

@@ -30,6 +30,7 @@ $$
       gender_type,
       payment_method,
       invoice_status,
+      payment_status,
       invoice_source,
       notification_type,
       device_type,
@@ -85,6 +86,15 @@ $$
   BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_status') THEN
       CREATE TYPE invoice_status AS ENUM ('pending', 'paid', 'refunded', 'cancelled');
+    END IF;
+  END
+$$;
+
+DO
+$$
+  BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_status') THEN
+      CREATE TYPE payment_status AS ENUM ('unpaid', 'paid', 'refunded');
     END IF;
   END
 $$;
@@ -148,6 +158,7 @@ CREATE TABLE IF NOT EXISTS users
   birthdate      DATE,
   avatar         TEXT,
   city           TEXT,
+  balance        NUMERIC(10, 2) NOT NULL CHECK (balance >= 0),
   role           user_role   DEFAULT 'customer',
   status         user_status DEFAULT 'active',
   email_verified BOOLEAN     DEFAULT FALSE,
@@ -216,38 +227,42 @@ CREATE TABLE IF NOT EXISTS provider_services
 
 CREATE TABLE IF NOT EXISTS orders
 (
-  id                UUID         DEFAULT uuid_generate_v4() PRIMARY KEY,
-  customer_id       UUID             NOT NULL REFERENCES customers (id) ON DELETE CASCADE,
-  provider_id       UUID             NOT NULL REFERENCES providers (id) ON DELETE CASCADE,
-  service_id        UUID             NOT NULL REFERENCES services (id) ON DELETE RESTRICT,
-  service_address   TEXT             NOT NULL,
-  service_latitude  DOUBLE PRECISION NOT NULL,
-  service_longitude DOUBLE PRECISION NOT NULL,
-  distance_m        INTEGER          NOT NULL,
-  service_fee       NUMERIC(10, 2)   NOT NULL CHECK (service_fee >= 0),
-  travel_fee        NUMERIC(10, 2)   NOT NULL CHECK (travel_fee >= 0),
-  total_amount      NUMERIC(10, 2)   NOT NULL,
-  actual_service_m  INTEGER      DEFAULT 0 CHECK (actual_service_m >= 0),
-  drive_duration_s  INTEGER          NOT NULL,
-  route_geometry    JSONB            NOT NULL,
-  scheduled_start   TIMESTAMPTZ      NOT NULL,
-  status            order_status DEFAULT 'pending',
-  note              TEXT,
-  created_at        TIMESTAMPTZ  DEFAULT now(),
-  updated_at        TIMESTAMPTZ,
-  closure_type      closureType  DEFAULT 'cancel',
-  closure_by_id     UUID,
-  closure_by_role   TEXT,
-  closure_reason    TEXT,
-  closure_at        TIMESTAMPTZ,
-  started_at        TIMESTAMPTZ,
-  start_latitude    DOUBLE PRECISION,
-  start_longitude   DOUBLE PRECISION,
-  completed_at      TIMESTAMPTZ,
-  completed_latitude DOUBLE PRECISION,
+  id                  UUID           DEFAULT uuid_generate_v4() PRIMARY KEY,
+  customer_id         UUID             NOT NULL REFERENCES customers (id) ON DELETE CASCADE,
+  provider_id         UUID             NOT NULL REFERENCES providers (id) ON DELETE CASCADE,
+  service_id          UUID             NOT NULL REFERENCES services (id) ON DELETE RESTRICT,
+  service_address     TEXT             NOT NULL,
+  service_latitude    DOUBLE PRECISION NOT NULL,
+  service_longitude   DOUBLE PRECISION NOT NULL,
+  distance_m          INTEGER          NOT NULL,
+  service_fee         NUMERIC(10, 2)   NOT NULL CHECK (service_fee >= 0),
+  travel_fee          NUMERIC(10, 2)   NOT NULL CHECK (travel_fee >= 0),
+  total_amount        NUMERIC(10, 2)   NOT NULL,
+  actual_service_m    INTEGER        DEFAULT 0 CHECK (actual_service_m >= 0),
+  drive_duration_s    INTEGER          NOT NULL,
+  route_geometry      JSONB            NOT NULL,
+  scheduled_start     TIMESTAMPTZ      NOT NULL,
+  status              order_status   DEFAULT 'pending',
+  payment_status      payment_status DEFAULT 'pending',
+  note                TEXT,
+  created_at          TIMESTAMPTZ    DEFAULT now(),
+  updated_at          TIMESTAMPTZ,
+  closure_type        closureType    DEFAULT 'cancel',
+  closure_by_id       UUID,
+  closure_by_role     TEXT,
+  closure_reason      TEXT,
+  closure_at          TIMESTAMPTZ,
+  started_at          TIMESTAMPTZ,
+  start_latitude      DOUBLE PRECISION,
+  start_longitude     DOUBLE PRECISION,
+  completed_at        TIMESTAMPTZ,
+  completed_latitude  DOUBLE PRECISION,
   completed_longitude DOUBLE PRECISION,
 );
 COMMENT ON COLUMN orders.closure_by_id IS 'user_id of the person who cancelled or rejected the order';
+CREATE UNIQUE INDEX one_active_order_per_customer
+  ON orders (customer_id)
+  WHERE status IN ('pending', 'accepted');
 
 
 CREATE TABLE IF NOT EXISTS invoices

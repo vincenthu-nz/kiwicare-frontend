@@ -2,7 +2,7 @@ import { CheckIcon, ClockIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { humanizeStatus } from "@/app/lib/utils";
 
-export default function OrderStatus({ status }: {status: string}) {
+export default function OrderStatus({ status, paymentStatus }: {status: string, paymentStatus?: string}) {
   let colorClass = "";
   let Icon = null;
 
@@ -26,7 +26,7 @@ export default function OrderStatus({ status }: {status: string}) {
         colorClass
       )}
     >
-      {humanizeStatus(status)}
+      {humanizeStatus(status)}{paymentStatus ? ` | ${humanizeStatus(paymentStatus)}` : ''}
       {Icon && <Icon className="ml-1 h-4 w-4"/>}
     </span>
   );

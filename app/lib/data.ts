@@ -349,6 +349,7 @@ export async function fetchFilteredOrders(
              providers.base_longitude AS provider_longitude,
              services.name            AS service,
              orders.status,
+             orders.payment_status,
              orders.route_geometry,
              orders.distance_m,
              orders.service_fee,
@@ -402,7 +403,8 @@ export async function fetchOrderById(id: string) {
              orders.total_amount,
              orders.created_at        AS date,
              orders.route_geometry,
-             orders.status
+             orders.status,
+             orders.payment_status
       FROM orders
              LEFT JOIN customers ON orders.customer_id = customers.id
              LEFT JOIN users AS c ON customers.user_id = c.id

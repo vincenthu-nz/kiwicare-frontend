@@ -76,7 +76,7 @@ export default async function OrdersTable(
               </div>
 
               <div className="flex flex-col items-end">
-                <OrderStatus status={order.status}/>
+                <OrderStatus status={order.status} paymentStatus={order.payment_status}/>
               </div>
             </div>
 
@@ -173,7 +173,7 @@ export default async function OrdersTable(
               {formatDateToLocal(order.date)}
             </td>
             <td className="whitespace-nowrap px-3 py-3">
-              <OrderStatus status={order.status}/>
+              <OrderStatus status={order.status} paymentStatus={order.payment_status}/>
             </td>
             <td className="whitespace-nowrap py-3 pl-6 pr-3">
               <div className="flex justify-end gap-3">
