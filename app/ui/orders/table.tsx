@@ -1,10 +1,10 @@
 import Image from 'next/image';
 import { formatCurrency, formatDateToLocal } from '@/app/lib/utils';
-import EmptyState from '@/app/ui/empty-state';
 import { getCurrentUserId } from '@/auth_token';
 import { fetchFilteredOrders } from '@/app/lib/data';
 import { Details } from '@/app/ui/orders/details';
 import OrderStatus from "@/app/ui/orders/status";
+import NotFound from "@/app/dashboard/invoices/[id]/edit/not-found";
 
 export default async function OrdersTable(
   {
@@ -17,7 +17,7 @@ export default async function OrdersTable(
   const orders = await fetchFilteredOrders(query, currentPage);
 
   if (orders.length === 0) {
-    return <EmptyState/>;
+    return <NotFound/>;
   }
 
   const currentUserId = await getCurrentUserId();

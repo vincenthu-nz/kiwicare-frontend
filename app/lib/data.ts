@@ -380,7 +380,10 @@ export async function fetchFilteredOrders(
   }
 }
 
-export async function fetchOrderById(id: string) {
+export async function fetchOrderById(id: string): Promise<{
+  order: OrdersTable | null;
+  reviews: {authorRole: string; rating: number; comment: string | null}[];
+}> {
   try {
     const data = await sql<OrdersTable[]>`
       SELECT orders.id,
@@ -413,7 +416,29 @@ export async function fetchOrderById(id: string) {
              LEFT JOIN services ON orders.service_id = services.id
       WHERE orders.id = ${id}
     `;
-    return data[0];
+
+    const order = data[0] ?? null;
+
+    if (!order) {
+      return { order: null, reviews: [] };
+    }
+
+    const reviewsData = await sql<{author_role: string; rating: number; comment: string | null}[]>`
+      SELECT author_role, rating, comment
+      FROM reviews
+      WHERE order_id = ${id}
+    `;
+
+    const reviews = reviewsData.map((r) => ({
+      authorRole: r.author_role,
+      rating: r.rating,
+      comment: r.comment,
+    }));
+
+    return {
+      order,
+      reviews
+    };
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch order.');

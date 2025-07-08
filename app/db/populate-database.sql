@@ -12,7 +12,12 @@ VALUES ('b0c1e8b6-79c5-4374-927d-6b22fb8a2b11', 'Jason', 'Smiths', 'user@nextmai
        ('2f970ba6-d897-4a1a-bc10-d4e9e2a44784', 'Lee', 'Robinson', 'lee@robinson.com',
         '$2b$10$Xf0Ui5hmiU8De9D2aQe4YugakkaX.BHVDdaK5Y5OfAc/mgwC38W16', '0201122334',
         'female', '1980-01-01', '/customers/lee-robinson.png', 'Wellington',
-        500, 'admin', 'active', true, false, now(), now(), now(), false);
+        500, 'admin', 'active', true, false, now(), now(), now(), false),
+       ('f3a1e2b4-5c67-48d8-93ab-8a4f623b8c2f', 'Admin', 'User', 'admin@kiwicare.com',
+        '$2b$10$Xf0Ui5hmiU8De9D2aQe4YugakkaX.BHVDdaK5Y5OfAc/mgwC38W16', '0210000000',
+        'male', '1990-01-01', NULL, 'Christchurch',
+        0, 'admin', 'active', true, true,
+        now(), now(), now(), false);
 
 
 INSERT INTO customers (id, user_id, default_address, default_latitude, default_longitude,

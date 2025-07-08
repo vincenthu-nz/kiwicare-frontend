@@ -9,35 +9,27 @@ export const formatCurrency = (amount: number) => {
 
 export const formatDateToLocal = (
   dateStr: string,
-  locale: string = 'en-US',
-) => {
+  showTime: boolean = false
+): string => {
   const date = new Date(dateStr);
+
   const options: Intl.DateTimeFormatOptions = {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
+    timeZone: 'Pacific/Auckland',
   };
-  const formatter = new Intl.DateTimeFormat(locale, options);
-  return formatter.format(date);
+
+  if (showTime) {
+    options.hour = '2-digit';
+    options.minute = '2-digit';
+    options.second = '2-digit';
+    options.hour12 = false;
+  }
+
+  return new Intl.DateTimeFormat('en-NZ', options).format(date);
 };
 
-export const formatDateTimeToLocal = (
-  dateStr: string,
-  locale: string = 'en-US',
-) => {
-  const date = new Date(dateStr);
-  const options: Intl.DateTimeFormatOptions = {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  };
-  const formatter = new Intl.DateTimeFormat(locale, options);
-  return formatter.format(date);
-};
 
 export const generateYAxis = (revenue: Revenue[], step: number = 1000) => {
   if (revenue.length === 0) return { yAxisLabels: [], topLabel: 0 };

@@ -1,18 +1,18 @@
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { fetchCustomers, fetchInvoiceById } from '@/app/lib/data';
-import { notFound } from 'next/navigation';
 import EditInvoiceForm from '@/app/ui/invoices/edit-form';
 import { Metadata } from 'next';
+import NotFound from "@/app/dashboard/invoices/[id]/edit/not-found";
 
 export const metadata: Metadata = {
   title: 'Edit Invoice',
 };
 
-export default async function Page({ params }: { params: any }) {
+export default async function Page({ params }: {params: any}) {
   const id = params.id;
 
   if (!id) {
-    notFound();
+    return <NotFound title="Invoice ID is required"/>;
   }
 
   const [invoice, users] = await Promise.all([
@@ -21,7 +21,7 @@ export default async function Page({ params }: { params: any }) {
   ]);
 
   if (!invoice) {
-    notFound();
+    return <NotFound/>
   }
 
   return (
@@ -36,7 +36,7 @@ export default async function Page({ params }: { params: any }) {
           },
         ]}
       />
-      <EditInvoiceForm invoice={invoice} users={users} />
+      <EditInvoiceForm invoice={invoice} users={users}/>
     </main>
   );
 }

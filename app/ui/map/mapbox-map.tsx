@@ -42,6 +42,7 @@ export default function MapboxMap(
       coordinates: [number, number],
       imgUrl: string,
       name: string,
+      isCustomer: boolean = false,
     ) {
       const container = document.createElement('div');
       container.style.display = 'flex';
@@ -60,7 +61,7 @@ export default function MapboxMap(
       });
 
       const label = document.createElement('div');
-      label.innerText = name;
+      label.innerHTML = `${name}<br><span style="display:block; text-align:center">${isCustomer ? '(Customer)' : '(Provider)'}</span>`;
       label.style.marginTop = '4px';
       label.style.color = '#111';
       label.style.fontWeight = 'bold';
@@ -77,7 +78,7 @@ export default function MapboxMap(
     }
 
     map.on('load', async () => {
-      addCustomMarker(origin, order.customer_avatar, order.customer_name);
+      addCustomMarker(origin, order.customer_avatar, order.customer_name, true);
       addCustomMarker(destination, order.provider_avatar, order.provider_name);
 
       let routeGeoJson = order.route_geometry;

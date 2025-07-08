@@ -1,23 +1,24 @@
 import { fetchFilteredUsers } from '@/app/lib/data';
 import UserStatus from '@/app/ui/users/status';
-import EmptyState from '@/app/ui/empty-state';
 import { EditUserStatus } from '@/app/ui/users/button';
 import { getCurrentUserId } from '@/auth_token';
 import Avatar from '@/app/ui/avatar';
+import NotFound from "@/app/dashboard/invoices/[id]/edit/not-found";
 
-export default async function UserTable({
-  query,
-  currentPage,
-  role,
-}: {
-  query: string;
-  currentPage: number;
-  role: string;
-}) {
+export default async function UserTable(
+  {
+    query,
+    currentPage,
+    role,
+  }: {
+    query: string;
+    currentPage: number;
+    role: string;
+  }) {
   const users = await fetchFilteredUsers(query, currentPage, role);
 
   if (users.length === 0) {
-    return <EmptyState />;
+    return <NotFound/>;
   }
 
   const currentUserId = await getCurrentUserId();
@@ -46,7 +47,7 @@ export default async function UserTable({
                 </div>
                 <p className="text-sm text-gray-500">{user.email}</p>
               </div>
-              <UserStatus status={user.status} />
+              <UserStatus status={user.status}/>
             </div>
             <div className="flex w-full items-center justify-between pt-4">
               <div>
@@ -54,11 +55,13 @@ export default async function UserTable({
                 <div className="mt-2 h-6 w-24 rounded">{user.role}</div>
               </div>
               <div className="flex justify-end gap-2">
-                <EditUserStatus
-                  id={user.id}
-                  status={user.status}
-                  role={user.role}
-                />
+                {user.role !== 'admin' && user.id !== currentUserId && (
+                  <EditUserStatus
+                    id={user.id}
+                    status={user.status}
+                    role={user.role}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -66,71 +69,71 @@ export default async function UserTable({
       </div>
       <table className="hidden min-w-full text-gray-900 md:table">
         <thead className="text-left text-sm font-normal">
-          <tr>
-            <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-              User
-            </th>
-            <th scope="col" className="px-3 py-5 font-medium">
-              Email
-            </th>
-            <th scope="col" className="px-3 py-5 font-medium">
-              City
-            </th>
-            <th scope="col" className="px-3 py-5 font-medium">
-              Role
-            </th>
-            <th scope="col" className="px-3 py-5 font-medium">
-              Status
-            </th>
-            <th scope="col" className="relative py-3 pl-6 pr-3">
-              <span className="sr-only">Edit</span>
-            </th>
-          </tr>
+        <tr>
+          <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
+            User
+          </th>
+          <th scope="col" className="px-3 py-5 font-medium">
+            Email
+          </th>
+          <th scope="col" className="px-3 py-5 font-medium">
+            City
+          </th>
+          <th scope="col" className="px-3 py-5 font-medium">
+            Role
+          </th>
+          <th scope="col" className="px-3 py-5 font-medium">
+            Status
+          </th>
+          <th scope="col" className="relative py-3 pl-6 pr-3">
+            <span className="sr-only">Edit</span>
+          </th>
+        </tr>
         </thead>
         <tbody className="bg-white">
-          {users?.map((user) => (
-            <tr
-              key={user.id}
-              className="border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
-            >
-              <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                <div className="flex items-center gap-3">
-                  <Avatar
-                    src={user.avatar}
-                    className="rounded-full"
-                    width={28}
-                    height={28}
-                    alt={`${user.name}'s profile picture`}
-                  />
-                  <p>
-                    {user.name}{' '}
-                    {user.id === currentUserId && (
-                      <span className="font-semibold">(You)</span>
-                    )}
-                  </p>
-                </div>
-              </td>
-              <td className="whitespace-nowrap px-3 py-3">{user.email}</td>
-              <td className="whitespace-nowrap px-3 py-3">
-                {user.city || '-'}
-              </td>
-              <td className="whitespace-nowrap px-3 py-3">{user.role}</td>
-              <td className="whitespace-nowrap px-3 py-3">
-                <UserStatus status={user.status} />
-              </td>
-              <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                <div className="flex min-w-[40px] justify-end gap-3">
-                  {user.id !== currentUserId && (
-                    <EditUserStatus
-                      id={user.id}
-                      status={user.status}
-                      role={user.role}
-                    />
+        {users?.map((user) => (
+          <tr
+            key={user.id}
+            className="border-b py-3 text-sm last-of-type:border-none [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg"
+          >
+            <td className="whitespace-nowrap py-3 pl-6 pr-3">
+              <div className="flex items-center gap-3">
+                <Avatar
+                  src={user.avatar}
+                  className="rounded-full"
+                  width={28}
+                  height={28}
+                  alt={`${user.name}'s profile picture`}
+                />
+                <p>
+                  {user.name}{' '}
+                  {user.id === currentUserId && (
+                    <span className="font-semibold">(You)</span>
                   )}
-                </div>
-              </td>
-            </tr>
-          ))}
+                </p>
+              </div>
+            </td>
+            <td className="whitespace-nowrap px-3 py-3">{user.email}</td>
+            <td className="whitespace-nowrap px-3 py-3">
+              {user.city || '-'}
+            </td>
+            <td className="whitespace-nowrap px-3 py-3">{user.role}</td>
+            <td className="whitespace-nowrap px-3 py-3">
+              <UserStatus status={user.status}/>
+            </td>
+            <td className="whitespace-nowrap py-3 pl-6 pr-3">
+              <div className="flex min-w-[40px] justify-end gap-3">
+                {user.role !== 'admin' && user.id !== currentUserId && (
+                  <EditUserStatus
+                    id={user.id}
+                    status={user.status}
+                    role={user.role}
+                  />
+                )}
+              </div>
+            </td>
+          </tr>
+        ))}
         </tbody>
       </table>
     </div>

@@ -1,10 +1,10 @@
 import { DeleteInvoice, UpdateInvoice } from '@/app/ui/invoices/buttons';
 import InvoiceStatus from '@/app/ui/invoices/status';
 import { formatCurrency, formatDateToLocal } from '@/app/lib/utils';
-import EmptyState from '@/app/ui/empty-state';
 import { getCurrentUserId } from '@/auth_token';
 import { fetchFilteredInvoices } from '@/app/lib/data';
 import Avatar from "@/app/ui/avatar";
+import NotFound from "@/app/dashboard/invoices/[id]/edit/not-found";
 
 export default async function InvoicesTable(
   {
@@ -17,7 +17,7 @@ export default async function InvoicesTable(
   const invoices = await fetchFilteredInvoices(query, currentPage);
 
   if (invoices.length === 0) {
-    return <EmptyState/>;
+    return <NotFound/>;
   }
 
   const currentUserId = await getCurrentUserId();

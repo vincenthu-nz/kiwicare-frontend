@@ -151,8 +151,8 @@ CREATE TABLE IF NOT EXISTS users
   name           VARCHAR(200) GENERATED ALWAYS AS (COALESCE(first_name, '') || ' ' || COALESCE(last_name, '')) STORED,
   first_name     VARCHAR(100),
   last_name      VARCHAR(100),
-  email          TEXT NOT NULL UNIQUE,
-  password       TEXT NOT NULL,
+  email          TEXT           NOT NULL UNIQUE,
+  password       TEXT           NOT NULL,
   phone          VARCHAR(20),
   gender         gender_type DEFAULT 'prefer not to say',
   birthdate      DATE,
@@ -316,3 +316,19 @@ CREATE TABLE pending_users
   created_at TIMESTAMPTZ DEFAULT now(),
   expires_at TIMESTAMPTZ
 );
+
+CREATE TABLE reviews
+(
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  order_id    UUID NOT NULL REFERENCES orders (id),
+  author_id   UUID NOT NULL,     -- Who wrote the review
+  target_id   UUID NOT NULL,     -- The user being reviewed
+  author_role TEXT CHECK (author_role IN ('customer', 'provider')),
+  rating      INT CHECK (rating >= 1 AND rating <= 5),
+  comment     TEXT CHECK (char_length(comment) <= 2000),
+  images      TEXT[] CHECK (array_length(images, 1) <= 6),
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (order_id, author_role) -- One review per role per order
+);
+COMMENT ON COLUMN reviews.comment IS 'User-written review text';
+
