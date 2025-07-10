@@ -30,7 +30,7 @@ export default async function Page({ params }: {params: any}) {
 
       <div className="overflow-hidden rounded-lg border shadow-sm">
         <div className="h-[400px] w-full sm:h-[670px]">
-          <Suspense fallback={<p>Loading...</p>}>
+          <Suspense fallback={<p className="p-4">Loading...</p>}>
             <MapboxMap order={order}/>
           </Suspense>
         </div>
@@ -49,7 +49,7 @@ export default async function Page({ params }: {params: any}) {
           />
           <Info
             label={
-              <span className="block md:hidden">
+              <span className="hidden md:inline">
                   Est. Fee(Service + Travel)
               </span>
             }

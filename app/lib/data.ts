@@ -327,13 +327,13 @@ export async function fetchOrdersPages(query: string) {
 }
 
 export async function fetchFilteredOrders(
-  query: string,
+  query: string = '',
   currentPage: number = 1,
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {
-    const data = await sql<OrdersTable[]>`
+    return await sql<OrdersTable[]>`
       SELECT orders.id,
              c.id                     AS customer_id,
              c.name                   AS customer_name,
@@ -372,11 +372,9 @@ export async function fetchFilteredOrders(
       ORDER BY orders.created_at DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
     `;
-
-    return data;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch users.');
+    throw new Error('Failed to fetch orders.');
   }
 }
 

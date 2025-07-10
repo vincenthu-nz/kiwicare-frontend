@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { OrdersTable } from '@/app/lib/definitions';
-import { GeoJSON } from "geojson";
+import { Feature } from "geojson";
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!;
 
@@ -61,7 +61,7 @@ export default function MapboxMap(
       });
 
       const label = document.createElement('div');
-      label.innerHTML = `${name}<br><span style="display:block; text-align:center">${isCustomer ? '(Customer)' : '(Provider)'}</span>`;
+      label.innerHTML = `${name}<br><span style="display:block; text-align:center; color: gray;">${isCustomer ? '(Customer)' : '(Provider)'}</span>`;
       label.style.marginTop = '4px';
       label.style.color = '#111';
       label.style.fontWeight = 'bold';
@@ -99,7 +99,7 @@ export default function MapboxMap(
         routeGeoJson = route.geometry;
       }
 
-      const geojson: GeoJSON.Feature = {
+      const geojson: Feature = {
         type: 'Feature',
         geometry: routeGeoJson,
         properties: {},
@@ -149,10 +149,10 @@ export default function MapboxMap(
 
     const recenterButton = document.createElement('button');
     recenterButton.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-        </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="24" height="24">
+        <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+        <path fill="none" stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+      </svg>
     `;
     recenterButton.style.position = 'absolute';
     recenterButton.style.top = '12px';
@@ -170,7 +170,7 @@ export default function MapboxMap(
     recenterButton.addEventListener('click', () => {
       const bounds = new mapboxgl.LngLatBounds(origin, origin);
       const source = map.getSource('route') as mapboxgl.GeoJSONSource;
-      const data = source?.serialize?.().data as GeoJSON.Feature;
+      const data = source?.serialize?.().data as Feature;
 
       if (data && data.geometry.type === 'LineString') {
         const coords = data.geometry.coordinates as [number, number][];
@@ -180,6 +180,10 @@ export default function MapboxMap(
     });
 
     return () => {
+      if (recenterButton && map.getContainer().contains(recenterButton)) {
+        map.getContainer().removeChild(recenterButton);
+      }
+      
       map.remove();
     };
   }, [

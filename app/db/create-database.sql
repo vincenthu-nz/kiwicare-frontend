@@ -13,6 +13,7 @@ $$
       providers,
       customers,
       pending_users,
+      reviews,
       users
     CASCADE
   ';
@@ -151,14 +152,14 @@ CREATE TABLE IF NOT EXISTS users
   name           VARCHAR(200) GENERATED ALWAYS AS (COALESCE(first_name, '') || ' ' || COALESCE(last_name, '')) STORED,
   first_name     VARCHAR(100),
   last_name      VARCHAR(100),
-  email          TEXT           NOT NULL UNIQUE,
-  password       TEXT           NOT NULL,
+  email          TEXT   NOT NULL UNIQUE,
+  password       TEXT   NOT NULL,
   phone          VARCHAR(20),
   gender         gender_type DEFAULT 'prefer not to say',
   birthdate      DATE,
   avatar         TEXT,
   city           TEXT,
-  balance        NUMERIC(10, 2) NOT NULL CHECK (balance >= 0),
+  balance        BIGINT NOT NULL CHECK (balance >= 0),
   role           user_role   DEFAULT 'customer',
   status         user_status DEFAULT 'active',
   email_verified BOOLEAN     DEFAULT FALSE,
@@ -216,10 +217,10 @@ CREATE TABLE IF NOT EXISTS services
 CREATE TABLE IF NOT EXISTS provider_services
 (
   id               UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  provider_id      UUID           NOT NULL REFERENCES providers (id) ON DELETE CASCADE,
-  service_id       UUID           NOT NULL REFERENCES services (id) ON DELETE CASCADE,
-  price            NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
-  duration_minutes INT            NOT NULL CHECK (duration_minutes > 0),
+  provider_id      UUID    NOT NULL REFERENCES providers (id) ON DELETE CASCADE,
+  service_id       UUID    NOT NULL REFERENCES services (id) ON DELETE CASCADE,
+  price            INTEGER NOT NULL CHECK (price >= 0),
+  duration_minutes INT     NOT NULL CHECK (duration_minutes > 0),
   notes            TEXT,
   UNIQUE (provider_id, service_id)
 );
@@ -235,15 +236,15 @@ CREATE TABLE IF NOT EXISTS orders
   service_latitude    DOUBLE PRECISION NOT NULL,
   service_longitude   DOUBLE PRECISION NOT NULL,
   distance_m          INTEGER          NOT NULL,
-  service_fee         NUMERIC(10, 2)   NOT NULL CHECK (service_fee >= 0),
-  travel_fee          NUMERIC(10, 2)   NOT NULL CHECK (travel_fee >= 0),
-  total_amount        NUMERIC(10, 2)   NOT NULL,
+  service_fee         INTEGER          NOT NULL CHECK (service_fee >= 0),
+  travel_fee          INTEGER          NOT NULL CHECK (travel_fee >= 0),
+  total_amount        INTEGER          NOT NULL CHECK (total_amount >= 0),
   actual_service_m    INTEGER        DEFAULT 0 CHECK (actual_service_m >= 0),
   drive_duration_s    INTEGER          NOT NULL,
   route_geometry      JSONB            NOT NULL,
   scheduled_start     TIMESTAMPTZ      NOT NULL,
   status              order_status   DEFAULT 'pending',
-  payment_status      payment_status DEFAULT 'pending',
+  payment_status      payment_status DEFAULT 'unpaid',
   note                TEXT,
   created_at          TIMESTAMPTZ    DEFAULT now(),
   updated_at          TIMESTAMPTZ,
@@ -257,7 +258,7 @@ CREATE TABLE IF NOT EXISTS orders
   start_longitude     DOUBLE PRECISION,
   completed_at        TIMESTAMPTZ,
   completed_latitude  DOUBLE PRECISION,
-  completed_longitude DOUBLE PRECISION,
+  completed_longitude DOUBLE PRECISION
 );
 COMMENT ON COLUMN orders.closure_by_id IS 'user_id of the person who cancelled or rejected the order';
 CREATE UNIQUE INDEX one_active_order_per_customer
@@ -270,7 +271,7 @@ CREATE TABLE IF NOT EXISTS invoices
   id             UUID           DEFAULT uuid_generate_v4() PRIMARY KEY,
   order_id       UUID REFERENCES orders (id) ON DELETE CASCADE,
   user_id        UUID           NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  amount         INTEGER        NOT NULL,
+  amount         INTEGER        NOT NULL CHECK (amount >= 0),
   tax_rate       INTEGER        DEFAULT 0,
   platform_fee   INTEGER        DEFAULT 0,
   payment_method payment_method NOT NULL,
@@ -327,7 +328,7 @@ CREATE TABLE reviews
   rating      INT CHECK (rating >= 1 AND rating <= 5),
   comment     TEXT CHECK (char_length(comment) <= 2000),
   images      TEXT[] CHECK (array_length(images, 1) <= 6),
-  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at  TIMESTAMP        DEFAULT CURRENT_TIMESTAMP,
   UNIQUE (order_id, author_role) -- One review per role per order
 );
 COMMENT ON COLUMN reviews.comment IS 'User-written review text';
