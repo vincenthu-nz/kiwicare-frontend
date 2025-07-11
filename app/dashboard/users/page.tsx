@@ -17,7 +17,7 @@ export default async function Page({ searchParams }: {searchParams?: any}) {
   const currentPage = Number(searchParams?.page) || 1;
   const role = searchParams?.role ?? '';
 
-  const totalPages = await fetchUsersPages(query);
+  const totalPages = await fetchUsersPages(query, role);
 
   return (
     <div className="w-full">

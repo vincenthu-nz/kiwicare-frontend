@@ -205,19 +205,34 @@ export async function fetchUsers() {
   }
 }
 
-export async function fetchUsersPages(query: string) {
+export async function fetchUsersPages(query: string = '', role: string = '') {
   try {
-    const data = await sql`
+    const conditions = [];
+    const values: any[] = [];
+
+    if (query) {
+      conditions.push(`(name ILIKE $${values.length + 1} OR email ILIKE $${values.length + 1})`);
+      values.push(`%${query}%`);
+    }
+
+    if (role) {
+      conditions.push(`role = $${values.length + 1}`);
+      values.push(role);
+    }
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    const sqlQuery = `
       SELECT COUNT(*)
-      FROM users
-      WHERE name ILIKE ${`%${query}%`}
-         OR email ILIKE ${`%${query}%`};
+      FROM users ${whereClause};
     `;
+
+    const data = await sql.unsafe(sqlQuery, values);
 
     return Math.ceil(Number(data[0].count) / ITEMS_PER_PAGE);
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of invoices.');
+    throw new Error('Failed to fetch total number of users.');
   }
 }
 

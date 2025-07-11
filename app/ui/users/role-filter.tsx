@@ -2,12 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import {
-  BriefcaseIcon,
-  ShieldCheckIcon,
-  ShoppingCartIcon,
-  UserGroupIcon,
-} from '@heroicons/react/24/outline';
+import { BriefcaseIcon, ShieldCheckIcon, ShoppingCartIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import React from 'react';
 
 type RoleItem = {
@@ -16,11 +11,7 @@ type RoleItem = {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
 
-export default function RoleFilter({
-  onRoleChange,
-}: {
-  onRoleChange?: (role: string) => void;
-}) {
+export default function RoleFilter() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -44,23 +35,21 @@ export default function RoleFilter({
           params.delete('role');
         }
 
+        // Automatically go to the first page when selecting a role
         params.delete('page');
 
-        const isActive = currentRole === value || (!value && !currentRole);
         const href = `${pathname}?${params.toString()}`;
+        const isActive = currentRole === value || (!value && !currentRole);
 
         return (
           <Link
             key={label}
-            href={href as string}
-            onClick={() => onRoleChange?.(value)}
+            href={href}
             className={`flex items-center gap-2 rounded px-3 py-1 text-sm transition-colors ${
               isActive ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'
             }`}
           >
-            <Icon
-              className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-600'}`}
-            />
+            <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-600'}`}/>
             <span>{label}</span>
           </Link>
         );
