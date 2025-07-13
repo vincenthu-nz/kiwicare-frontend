@@ -2,9 +2,6 @@ import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { lusitana } from '@/app/ui/fonts';
 import { fetchLatestInvoices } from '@/app/lib/data';
-import { Button } from '@/app/ui/button';
-import { ArrowRightIcon } from '@heroicons/react/20/solid';
-import Link from 'next/link';
 import Avatar from "@/app/ui/avatar";
 
 export default async function LatestInvoices() {
@@ -56,12 +53,6 @@ export default async function LatestInvoices() {
             <ArrowPathIcon className="h-5 w-5 text-gray-500"/>
             <h3 className="ml-2 text-sm text-gray-500">Updated just now</h3>
           </div>
-
-          <Link href="/dashboard/invoices">
-            <Button className="mt-4">
-              More <ArrowRightIcon className="ml-2 h-5 w-5 text-gray-50"/>
-            </Button>
-          </Link>
         </div>
       </div>
     </div>

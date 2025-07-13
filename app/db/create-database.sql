@@ -36,7 +36,8 @@ $$
       notification_type,
       device_type,
       order_status,
-      closureType
+      closureType,
+      invoice_role
     CASCADE
   ';
   END
@@ -112,6 +113,15 @@ $$;
 DO
 $$
   BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'invoice_role') THEN
+      CREATE TYPE invoice_role AS ENUM ('customer', 'provider');
+    END IF;
+  END
+$$;
+
+DO
+$$
+  BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_type') THEN
       CREATE TYPE notification_type AS ENUM ('push', 'email', 'sms');
     END IF;
@@ -152,14 +162,14 @@ CREATE TABLE IF NOT EXISTS users
   name           VARCHAR(200) GENERATED ALWAYS AS (COALESCE(first_name, '') || ' ' || COALESCE(last_name, '')) STORED,
   first_name     VARCHAR(100),
   last_name      VARCHAR(100),
-  email          TEXT   NOT NULL UNIQUE,
-  password       TEXT   NOT NULL,
+  email          TEXT                  NOT NULL UNIQUE,
+  password       TEXT                  NOT NULL,
   phone          VARCHAR(20),
   gender         gender_type DEFAULT 'prefer not to say',
   birthdate      DATE,
   avatar         TEXT,
   city           TEXT,
-  balance        BIGINT NOT NULL CHECK (balance >= 0),
+  balance        BIGINT      DEFAULT 0 NOT NULL CHECK (balance >= 0),
   role           user_role   DEFAULT 'customer',
   status         user_status DEFAULT 'active',
   email_verified BOOLEAN     DEFAULT FALSE,
@@ -239,6 +249,7 @@ CREATE TABLE IF NOT EXISTS orders
   service_fee         INTEGER          NOT NULL CHECK (service_fee >= 0),
   travel_fee          INTEGER          NOT NULL CHECK (travel_fee >= 0),
   total_amount        INTEGER          NOT NULL CHECK (total_amount >= 0),
+  platform_fee        INTEGER        DEFAULT 0,
   actual_service_m    INTEGER        DEFAULT 0 CHECK (actual_service_m >= 0),
   drive_duration_s    INTEGER          NOT NULL,
   route_geometry      JSONB            NOT NULL,
@@ -268,19 +279,21 @@ CREATE UNIQUE INDEX one_active_order_per_customer
 
 CREATE TABLE IF NOT EXISTS invoices
 (
-  id             UUID           DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id             UUID                    DEFAULT uuid_generate_v4() PRIMARY KEY,
   order_id       UUID REFERENCES orders (id) ON DELETE CASCADE,
   user_id        UUID           NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  role           invoice_role   NOT NULL DEFAULT 'customer',
   amount         INTEGER        NOT NULL CHECK (amount >= 0),
-  tax_rate       INTEGER        DEFAULT 0,
-  platform_fee   INTEGER        DEFAULT 0,
+  tax_rate       INTEGER                 DEFAULT 0,
+  platform_fee   INTEGER                 DEFAULT 0,
   payment_method payment_method NOT NULL,
   paid_at        TIMESTAMPTZ,
   refund_at      TIMESTAMPTZ,
   refund_reason  TEXT,
-  date           TIMESTAMPTZ    DEFAULT now(),
-  status         invoice_status DEFAULT 'pending',
-  source         invoice_source DEFAULT 'order'
+  date           TIMESTAMPTZ             DEFAULT now(),
+  status         invoice_status          DEFAULT 'pending',
+  source         invoice_source          DEFAULT 'order',
+  description    TEXT
 );
 
 
@@ -310,7 +323,8 @@ CREATE TABLE IF NOT EXISTS user_devices
 CREATE TABLE pending_users
 (
   email      TEXT PRIMARY KEY,
-  password   TEXT,
+  password   TEXT NOT NULL,
+  role       user_role   DEFAULT 'customer',
   first_name VARCHAR(100),
   last_name  VARCHAR(100),
   token      TEXT,

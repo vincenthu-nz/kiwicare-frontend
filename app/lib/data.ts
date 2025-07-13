@@ -41,7 +41,7 @@ export async function fetchRevenue(): Promise<
   }
 }
 
-export async function fetchLatestInvoices() {
+export async function fetchLatestInvoices(role: 'customer' | 'provider' = 'customer') {
   try {
     const data = await sql<LatestInvoiceRaw[]>`
       SELECT invoices.amount,
@@ -54,6 +54,7 @@ export async function fetchLatestInvoices() {
              LEFT JOIN customers ON orders.customer_id = customers.id
              LEFT JOIN users ON
         (customers.user_id = users.id OR invoices.user_id = users.id)
+      WHERE invoices.role = ${role.toLowerCase()}
       ORDER BY invoices.date DESC
       LIMIT 5`;
 
@@ -108,8 +109,11 @@ export async function fetchFilteredInvoices(
     return await sql<InvoicesTable[]>`
       SELECT invoices.id,
              invoices.amount,
+             invoices.platform_fee,
              invoices.date,
              invoices.status,
+             invoices.role,
+             invoices.order_id,
              users.id as user_id,
              users.name,
              users.email,
@@ -121,6 +125,7 @@ export async function fetchFilteredInvoices(
          OR invoices.amount::text ILIKE ${`%${query}%`}
          OR invoices.date::text ILIKE ${`%${query}%`}
          OR invoices.status::text ILIKE ${`%${query}%`}
+         OR invoices.order_id::text ILIKE ${`%${query}%`}
       ORDER BY invoices.date DESC
       LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;

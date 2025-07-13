@@ -50,6 +50,9 @@ export default async function InvoicesTable(
             </div>
             <div className="flex w-full items-center justify-between pt-4">
               <div>
+                <p className="text-sm text-gray-500">
+                  #{invoice.order_id}
+                </p>
                 <p className="text-xl font-medium">
                   {formatCurrency(invoice.amount)}
                 </p>
@@ -67,13 +70,16 @@ export default async function InvoicesTable(
         <thead className="text-left text-sm font-normal">
         <tr>
           <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-            Customer
+            User
           </th>
           <th scope="col" className="px-3 py-5 font-medium">
             Email
           </th>
           <th scope="col" className="px-3 py-5 font-medium">
             Amount
+          </th>
+          <th scope="col" className="px-3 py-5 font-medium">
+            Order
           </th>
           <th scope="col" className="px-3 py-5 font-medium">
             Date
@@ -102,16 +108,21 @@ export default async function InvoicesTable(
                   alt={`${invoice.name}'s profile picture`}
                 />
                 <p>
-                  {invoice.name}{' '}
-                  {invoice.user_id === currentUserId && (
-                    <span className="font-semibold">(You)</span>
-                  )}
+                  {invoice.name} <span className="font-semibold">{getInvoiceSuffix(invoice, currentUserId)}</span>
                 </p>
               </div>
             </td>
             <td className="whitespace-nowrap px-3 py-3">{invoice.email}</td>
             <td className="whitespace-nowrap px-3 py-3">
               {formatCurrency(invoice.amount)}
+              {invoice.role.toUpperCase() === 'PROVIDER' && invoice.platform_fee > 0 && (
+                <span className="text-gray-500 ml-1">
+                  (+{formatCurrency(invoice.platform_fee)} fee)
+                </span>
+              )}
+            </td>
+            <td>
+              #{invoice.order_id}
             </td>
             <td className="whitespace-nowrap px-3 py-3">
               {formatDateToLocal(invoice.date)}
@@ -131,4 +142,10 @@ export default async function InvoicesTable(
       </table>
     </div>
   );
+}
+
+function getInvoiceSuffix(invoice: {role: string; user_id: string}, currentUserId: string | null): string {
+  const roleLabel = invoice.role.toUpperCase() === 'PROVIDER' ? 'Provider' : 'Customer';
+  const isYou = invoice.user_id === currentUserId;
+  return isYou ? `(You/${roleLabel})` : `(${roleLabel})`;
 }

@@ -12,6 +12,11 @@ export enum Role {
   PROVIDER = 'provider',
 }
 
+export enum InvoiceRole {
+  CUSTOMER = 'customer',
+  PROVIDER = 'provider',
+}
+
 export type UserValidationFields = 'userId' | 'amount' | 'status';
 export type CustomerValidationFields = 'customerId' | 'amount' | 'status';
 
@@ -72,6 +77,7 @@ export type LatestInvoiceRaw = Omit<LatestInvoice, 'amount'> & {
 
 export type InvoicesTable = {
   id: string;
+  order_id: string;
   user_id: string;
   customer_id: string;
   name: string;
@@ -79,7 +85,9 @@ export type InvoicesTable = {
   avatar: string;
   date: string;
   amount: number;
+  platform_fee: number;
   status: 'pending' | 'paid';
+  role: InvoiceRole;
 };
 
 export type OrdersTable = {

@@ -1,5 +1,42 @@
-## Next.js App Router Course - Starter
+# KiwiCare – Admin Dashboard (Next.js)
 
-This is the starter template for the Next.js App Router Course. It contains the starting code for the dashboard application.
+A web admin dashboard built with Next.js App Router, for the KiwiCare platform. This project recreates core admin
+features from a commercial app, adapted and open-sourced here.
 
-For more information, see the [course curriculum](https://nextjs.org/learn) on the Next.js Website.
+---
+
+✨ **Features**
+
+- Modern Next.js App Router structure
+- Admin dashboard with overview, invoices, orders, and user management
+- Modular, typed, and maintainable codebase
+- Email verification workflow
+- Responsive design
+
+---
+
+📂 **Project Structure**
+
+```
+kiwi-care/
+├── app/
+│ ├── dashboard/
+│ │ ├── (overview)/
+│ │ ├── invoices/
+│ │ ├── orders/
+│ │ └── users/
+│ ├── db/
+│ ├── lib/
+│ ├── login/
+│ ├── ui/
+│ └── verify-email/
+├── public/
+├── types/
+├── README.md
+```
+
+---
+
+🚀 **Deployment**
+
+This project is deployed on [Vercel](https://vercel.com/) for production-ready, serverless hosting with automatic CI/CD.

@@ -130,16 +130,36 @@ export async function verifyEmailByToken(token: string) {
     return { status: 'error', message: 'This verification link has expired.' };
   }
 
-  await sql`
-    INSERT INTO users (email, password, first_name, last_name)
-    VALUES (${pendingUser.email}, ${pendingUser.password}, ${pendingUser.first_name}, ${pendingUser.last_name})
-  `;
+  await sql.begin(async (trx) => {
+    const insertedUsers = await trx`
+      INSERT INTO users (email, password, first_name, last_name, role)
+      VALUES (${pendingUser.email},
+              ${pendingUser.password},
+              ${pendingUser.first_name},
+              ${pendingUser.last_name},
+              ${pendingUser.role})
+      RETURNING id, role
+    `;
+    const newUser = insertedUsers[0];
 
-  await sql`
-    DELETE
-    FROM pending_users
-    WHERE email = ${pendingUser.email}
-  `;
+    if (newUser.role === 'customer') {
+      await trx`
+        INSERT INTO customers (user_id)
+        VALUES (${newUser.id})
+      `;
+    } else if (newUser.role === 'provider') {
+      await trx`
+        INSERT INTO providers (user_id)
+        VALUES (${newUser.id})
+      `;
+    }
+
+    await trx`
+      DELETE
+      FROM pending_users
+      WHERE email = ${pendingUser.email}
+    `;
+  });
 
   return { status: 'success', email: pendingUser.email };
 }

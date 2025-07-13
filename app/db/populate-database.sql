@@ -290,21 +290,21 @@ VALUES ('e5b60c7f-1663-4ed4-a226-299725cbe7ef',
 --         }'::jsonb);
 
 
-INSERT INTO invoices (id, order_id, user_id, amount, tax_rate, platform_fee,
-                      payment_method, paid_at, status)
-VALUES ('fa65e82e-4a2a-4040-9398-45d20eb5eb8a',
-        'f7a41952-2213-4d65-98a8-5af6e92e03df',
-        'b0c1e8b6-79c5-4374-927d-6b22fb8a2b11',
-        12000, 15, 20, 'credit_card',
-        '2025-06-26T12:00:00+12:00', 'paid'),
-       ('fb76f92f-5b3b-4051-a601-40ef32fc5c9c', null,
-        'b0c1e8b6-79c5-4374-927d-6b22fb8a2b11',
-        1000, 15, 20, 'credit_card',
-        '2025-05-21T12:00:00+12:00', 'paid'),
-       ('fc87fa40-6c4c-4871-b53d-3ef29b0f6a5d', null,
-        'b92a9b2e-4a6f-4a76-9b14-97bb763e6173',
-        1000, 15, 20, 'credit_card',
-        '2025-04-11T12:00:00+12:00', 'paid');
+-- INSERT INTO invoices (id, order_id, user_id, amount, tax_rate, platform_fee,
+--                       payment_method, paid_at, status)
+-- VALUES ('fa65e82e-4a2a-4040-9398-45d20eb5eb8a',
+--         'b8c88864-4ba0-4e3c-9442-71d7cf878c97',
+--         'b0c1e8b6-79c5-4374-927d-6b22fb8a2b11',
+--         12000, 15, 20, 'credit_card',
+--         '2025-06-26T12:00:00+12:00', 'paid'),
+--        ('fb76f92f-5b3b-4051-a601-40ef32fc5c9c', null,
+--         'b0c1e8b6-79c5-4374-927d-6b22fb8a2b11',
+--         1000, 15, 20, 'credit_card',
+--         '2025-05-21T12:00:00+12:00', 'paid'),
+--        ('fc87fa40-6c4c-4871-b53d-3ef29b0f6a5d', null,
+--         'b92a9b2e-4a6f-4a76-9b14-97bb763e6173',
+--         1000, 15, 20, 'credit_card',
+--         '2025-04-11T12:00:00+12:00', 'paid');
 
 
 INSERT INTO notifications (id, user_id, title, message, sent_at, is_read, type)
