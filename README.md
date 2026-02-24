@@ -125,7 +125,9 @@ psql $DB_HOST -f app/db/populate-database.sql
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) or the live deployment at [kiwicare-git-main-vincents-projects-8301af1f.vercel.app](https://kiwicare-git-main-vincents-projects-8301af1f.vercel.app) and log in with one of the test accounts below.
+Open [http://localhost:3000](http://localhost:3000) or the live deployment
+at [kiwicare-git-main-vincents-projects-8301af1f.vercel.app](https://kiwicare-git-main-vincents-projects-8301af1f.vercel.app)
+and log in with one of the test accounts below.
 
 ---
 
@@ -133,12 +135,12 @@ Open [http://localhost:3000](http://localhost:3000) or the live deployment at [k
 
 All accounts share the same password: `Abc123456?`
 
-| Role     | Email                    | Password     |
-|----------|--------------------------|--------------|
-| Admin    | admin@kiwicare.com       | Abc123456?   |
-| Admin    | lee@robinson.com         | Abc123456?   |
-| Customer | user@nextmail.com        | Abc123456?   |
-| Provider | delba@oliveira.com       | Abc123456?   |
+| Role     | Email              | Password   |
+|----------|--------------------|------------|
+| Admin    | admin@kiwicare.com | Abc123456? |
+| Admin    | lee@robinson.com   | Abc123456? |
+| Customer | user@nextmail.com  | Abc123456? |
+| Provider | delba@oliveira.com | Abc123456? |
 
 > **Note:** The dashboard is admin-only. Customer and provider accounts will be redirected away on login.
 
@@ -158,7 +160,7 @@ pnpm test:coverage
 ```
 
 Tests live in `app/lib/__tests__/` and cover utility functions, Zod validation schemas, and server actions (with a
-mocked database).
+mocked database)
 
 ---
 
