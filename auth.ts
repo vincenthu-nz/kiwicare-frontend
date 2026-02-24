@@ -6,10 +6,19 @@ import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcrypt';
 import sql from '@/app/lib/db';
 
+/**
+ * Looks up a user by email address, selecting only the fields required for
+ * authentication. Returns `undefined` when no matching record exists.
+ *
+ * Note: `SELECT *` is intentionally avoided to prevent leaking sensitive
+ * fields (balance, phone, addresses, etc.) into the auth layer.
+ *
+ * @param email - The email address to look up.
+ */
 async function getUser(email: string): Promise<User | undefined> {
   try {
     const user = await sql<User[]>`
-      SELECT *
+      SELECT id, name, email, password, avatar, city, role, status
       FROM users
       WHERE email = ${email}
     `;
@@ -20,6 +29,16 @@ async function getUser(email: string): Promise<User | undefined> {
   }
 }
 
+/**
+ * NextAuth configuration with the Credentials provider.
+ *
+ * - Only `admin`-role users are permitted to access the dashboard.
+ * - `banned` accounts receive a distinct, non-enumerable error message.
+ * - Generic "Invalid email or password" is returned for missing users and
+ *   wrong passwords to prevent user-enumeration attacks.
+ * - The user's `id` and `role` are forwarded from the JWT into the session
+ *   so downstream server components can access them without re-querying the DB.
+ */
 export const { signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
@@ -51,21 +70,22 @@ export const { signIn, signOut } = NextAuth({
         const { email, password } = parsed.data;
 
         const user = await getUser(email);
+        // Use a generic message to prevent user-enumeration attacks
         if (!user) {
-          throw new Error('No user found with this email');
+          throw new Error('Invalid email or password.');
         }
 
         if (user.status === 'banned') {
-          throw new Error('Your account has been banned');
+          throw new Error('Your account has been suspended. Please contact support.');
         }
 
         if (user.role !== 'admin') {
-          throw new Error('Only admin users can access this system');
+          throw new Error('Access denied. Admin credentials required.');
         }
 
         const passwordsMatch = await bcrypt.compare(password, user.password);
         if (!passwordsMatch) {
-          throw new Error('Incorrect password');
+          throw new Error('Invalid email or password.');
         }
 
         const { id, name, role } = user;
@@ -74,6 +94,7 @@ export const { signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    /** Attaches `id` and `role` to the JWT so the session callback can read them. */
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id as string;
@@ -81,6 +102,7 @@ export const { signIn, signOut } = NextAuth({
       }
       return token;
     },
+    /** Exposes `id` and `role` on the client-side session object. */
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;

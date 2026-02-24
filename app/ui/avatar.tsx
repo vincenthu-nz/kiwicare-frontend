@@ -1,4 +1,8 @@
+'use client';
+
 import Image from 'next/image';
+import { useState } from 'react';
+import { UserCircleIcon } from '@heroicons/react/24/solid';
 
 export default function Avatar({
   src,
@@ -13,15 +17,26 @@ export default function Avatar({
   height?: number;
   className?: string;
 }) {
-  const fallback = '/default-avatar.png';
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return (
+      <UserCircleIcon
+        aria-label={alt}
+        style={{ width, height }}
+        className={`text-gray-400 ${className}`}
+      />
+    );
+  }
 
   return (
     <Image
-      src={src || fallback}
+      src={src}
       alt={alt}
       width={width}
       height={height}
       className={className}
+      onError={() => setFailed(true)}
     />
   );
 }

@@ -4,7 +4,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { CheckIcon, ChevronDownIcon, ClockIcon, XMarkIcon, } from '@heroicons/react/24/outline';
 import { JSX } from 'react';
 import { Role, UserStatus } from '@/app/lib/definitions';
-import { updateUserStatus } from '@/app/lib/data';
+import { updateUserStatus } from '@/app/lib/actions';
 
 const STATUS_ITEMS: {
   key: UserStatus;

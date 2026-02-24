@@ -3,16 +3,17 @@ import { Metadata } from 'next';
 import { lusitana } from "@/app/ui/fonts";
 import OrderStatus from "@/app/ui/orders/status";
 import React, { Suspense } from "react";
-import MapboxMap from "@/app/ui/map/mapbox-map";
 import { formatDateToLocal } from "@/app/lib/utils";
 import NotFound from "@/app/dashboard/invoices/[id]/edit/not-found";
+import MapboxMap from "@/app/ui/map/mapbox-map-wrapper";
 
 export const metadata: Metadata = {
   title: 'Order Details',
 };
 
-export default async function Page({ params }: {params: any}) {
-  const { order, reviews } = await fetchOrderById(params.id);
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params;
+  const { order, reviews } = await fetchOrderById(id);
 
   if (!order) {
     return <NotFound/>;

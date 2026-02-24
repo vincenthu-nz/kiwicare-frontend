@@ -1,10 +1,10 @@
-import Image from 'next/image';
 import { formatCurrency, formatDateToLocal } from '@/app/lib/utils';
 import { getCurrentUserId } from '@/auth_token';
 import { fetchFilteredOrders } from '@/app/lib/data';
 import { Details } from '@/app/ui/orders/details';
 import OrderStatus from "@/app/ui/orders/status";
 import NotFound from "@/app/dashboard/invoices/[id]/edit/not-found";
+import Avatar from '@/app/ui/avatar';
 
 export default async function OrdersTable(
   {
@@ -67,7 +67,7 @@ function OrderCard(order: any, currentUserId: string) {
       <div className="flex items-center justify-between border-b pb-4">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <Image
+            <Avatar
               src={order.customer_avatar}
               className="rounded-full"
               width={32}
@@ -83,7 +83,7 @@ function OrderCard(order: any, currentUserId: string) {
           </div>
 
           <div className="flex items-center gap-3">
-            <Image
+            <Avatar
               src={order.provider_avatar}
               className="rounded-full"
               width={32}
@@ -129,7 +129,7 @@ function OrderTableRow(order: any, currentUserId: string) {
     >
       <td className="whitespace-nowrap py-3 pl-6 pr-3">
         <div className="flex items-center gap-3">
-          <Image
+          <Avatar
             src={order.customer_avatar}
             className="rounded-full"
             width={28}
@@ -146,14 +146,12 @@ function OrderTableRow(order: any, currentUserId: string) {
       </td>
       <td className="whitespace-nowrap px-3 py-3">
         <div className="flex items-center gap-3">
-          <Image
+          <Avatar
             src={order.provider_avatar}
             className="rounded-full"
             width={32}
             height={32}
             alt={`${order.provider_name}'s profile picture`}
-            loading="lazy"
-            decoding="async"
           />
           <p className="flex items-center text-base text-gray-900">
             {order.provider_name}

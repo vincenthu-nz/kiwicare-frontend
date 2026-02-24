@@ -7,17 +7,18 @@ import {
   LatestInvoiceRaw,
   OrdersTable,
   Revenue,
-  State,
   User,
-  UserStatus,
 } from './definitions';
 import { formatCurrency } from './utils';
 import sql from '@/app/lib/db';
-import { revalidatePath } from 'next/cache';
-import { getCurrentUserId } from '@/auth_token';
 
+/** Number of records returned per paginated page. */
 const ITEMS_PER_PAGE = 6;
 
+/**
+ * Fetches monthly revenue totals for paid invoices.
+ * Amounts are stored as integer cents in the DB and converted to dollars here.
+ */
 export async function fetchRevenue(): Promise<
   {month: string; revenue: number}[]
 > {
@@ -41,6 +42,13 @@ export async function fetchRevenue(): Promise<
   }
 }
 
+/**
+ * Fetches the 5 most recent invoices for the given role (customer or provider).
+ * The join resolves the display user: either via the order's customer or the
+ * invoice's direct user_id for manual/admin invoices.
+ *
+ * @param role - Invoice role to filter by. Defaults to 'customer'.
+ */
 export async function fetchLatestInvoices(role: 'customer' | 'provider' = 'customer') {
   try {
     const data = await sql<LatestInvoiceRaw[]>`
@@ -68,6 +76,11 @@ export async function fetchLatestInvoices(role: 'customer' | 'provider' = 'custo
   }
 }
 
+/**
+ * Fetches aggregate statistics for the dashboard overview cards.
+ * Uses a single query with correlated subqueries for efficiency.
+ * Monetary amounts are converted from cents to dollars.
+ */
 export async function fetchCardData() {
   try {
     const [row] = await sql<
@@ -99,6 +112,13 @@ export async function fetchCardData() {
   }
 }
 
+/**
+ * Fetches a paginated, searchable list of invoices.
+ * Searches across user name, email, amount, date, status, and order ID.
+ *
+ * @param query - Free-text search string.
+ * @param currentPage - 1-based page number.
+ */
 export async function fetchFilteredInvoices(
   query: string,
   currentPage: number,
@@ -135,6 +155,11 @@ export async function fetchFilteredInvoices(
   }
 }
 
+/**
+ * Returns the total number of pages for a paginated invoice search.
+ *
+ * @param query - Free-text search string.
+ */
 export async function fetchInvoicesPages(query: string) {
   try {
     const data = await sql`
@@ -157,6 +182,12 @@ export async function fetchInvoicesPages(query: string) {
   }
 }
 
+/**
+ * Fetches a single invoice by its UUID, converting amount from cents to dollars.
+ *
+ * @param id - Invoice UUID.
+ * @returns The invoice form data, or `undefined` if not found.
+ */
 export async function fetchInvoiceById(id: string) {
   try {
     const data = await sql<InvoiceForm[]>`
@@ -169,19 +200,20 @@ export async function fetchInvoiceById(id: string) {
       WHERE invoices.id = ${id};
     `;
 
-    const invoice = data.map((invoice) => ({
+    return data.map((invoice) => ({
       ...invoice,
-      // Convert amount from cents to dollars
+      // Convert amount from cents to dollars for the edit form
       amount: invoice.amount / 100,
-    }));
-
-    return invoice[0];
+    }))[0];
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoice.');
   }
 }
 
+/**
+ * Fetches all customer records as lightweight id/name pairs for select fields.
+ */
 export async function fetchCustomers() {
   try {
     return await sql<CustomerField[]>`
@@ -193,14 +225,17 @@ export async function fetchCustomers() {
     `;
   } catch (err) {
     console.error('Database Error:', err);
-    throw new Error('Failed to fetch all users.');
+    throw new Error('Failed to fetch all customers.');
   }
 }
 
+/**
+ * Fetches all users, explicitly excluding sensitive fields such as passwords.
+ */
 export async function fetchUsers() {
   try {
     return await sql<User[]>`
-      SELECT *
+      SELECT id, name, email, avatar, city, role, status
       FROM users
       ORDER BY name
     `;
@@ -210,30 +245,22 @@ export async function fetchUsers() {
   }
 }
 
+/**
+ * Returns the total number of pages for a paginated user search.
+ * Supports optional role filtering using safe parameterized queries.
+ *
+ * @param query - Free-text search string (matches name or email).
+ * @param role  - Optional role filter ('customer' | 'provider' | 'admin').
+ */
 export async function fetchUsersPages(query: string = '', role: string = '') {
+  const likeQuery = `%${query}%`;
   try {
-    const conditions = [];
-    const values: any[] = [];
-
-    if (query) {
-      conditions.push(`(name ILIKE $${values.length + 1} OR email ILIKE $${values.length + 1})`);
-      values.push(`%${query}%`);
-    }
-
-    if (role) {
-      conditions.push(`role = $${values.length + 1}`);
-      values.push(role);
-    }
-
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
-    const sqlQuery = `
+    const data = await sql`
       SELECT COUNT(*)
-      FROM users ${whereClause};
+      FROM users
+      WHERE (name ILIKE ${likeQuery} OR email ILIKE ${likeQuery})
+      ${role ? sql`AND role = ${role}` : sql``}
     `;
-
-    const data = await sql.unsafe(sqlQuery, values);
-
     return Math.ceil(Number(data[0].count) / ITEMS_PER_PAGE);
   } catch (error) {
     console.error('Database Error:', error);
@@ -241,6 +268,15 @@ export async function fetchUsersPages(query: string = '', role: string = '') {
   }
 }
 
+/**
+ * Fetches a paginated, searchable list of users.
+ * Supports optional role filtering. Uses safe parameterized template literals
+ * throughout — no raw string interpolation.
+ *
+ * @param query       - Free-text search string (matches name or email).
+ * @param currentPage - 1-based page number.
+ * @param role        - Optional role filter ('customer' | 'provider' | 'admin').
+ */
 export async function fetchFilteredUsers(
   query: string,
   currentPage: number,
@@ -248,78 +284,28 @@ export async function fetchFilteredUsers(
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   const likeQuery = `%${query}%`;
-
-  let baseSQL = `
-    SELECT id, name, email, avatar, city, role, status
-    FROM users
-    WHERE (name ILIKE $1 OR email ILIKE $1)
-  `;
-  const values: any[] = [likeQuery];
-
-  // If a role is provided, add it to the WHERE clause
-  if (role) {
-    baseSQL += ` AND role = $2`;
-    values.push(role);
-  }
-
-  baseSQL += ` ORDER BY name LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
-  values.push(ITEMS_PER_PAGE, offset);
-
   try {
-    return await sql.unsafe(baseSQL, values);
+    return await sql<User[]>`
+      SELECT id, name, email, avatar, city, role, status
+      FROM users
+      WHERE (name ILIKE ${likeQuery} OR email ILIKE ${likeQuery})
+      ${role ? sql`AND role = ${role}` : sql``}
+      ORDER BY name
+      LIMIT ${ITEMS_PER_PAGE}
+      OFFSET ${offset}
+    `;
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch users.');
   }
 }
 
-export async function updateUserStatus(
-  id: string,
-  _prevState: State<'userId'>,
-  formData: FormData,
-): Promise<State<'userId'>> {
-  const status = formData.get('status') as UserStatus;
-
-  const currentUserId = await getCurrentUserId();
-  if (!currentUserId) {
-    return {
-      message: 'Not authenticated',
-      errors: { userId: ['Unauthenticated'] },
-    };
-  }
-
-  if (currentUserId === id) {
-    return {
-      message: 'You cannot modify your own status',
-      errors: { userId: ['Operation not allowed'] },
-    };
-  }
-
-  const result = await sql<{status: UserStatus}[]>`
-    SELECT status
-    FROM users
-    WHERE id = ${id}
-  `;
-
-  if (result.length === 0) {
-    return { message: 'User not found', errors: { userId: ['Not found'] } };
-  }
-
-  const currentStatus = result[0].status;
-  if (currentStatus === status) {
-    return { message: 'No change' };
-  }
-
-  await sql`
-    UPDATE users
-    SET status = ${status}
-    WHERE id = ${id}
-  `;
-
-  revalidatePath('/dashboard/users');
-  return { message: 'User status updated' };
-}
-
+/**
+ * Returns the total number of pages for a paginated order search.
+ * Searches across customer, provider, service name, status, date, and amount.
+ *
+ * @param query - Free-text search string.
+ */
 export async function fetchOrdersPages(query: string) {
   try {
     const data = await sql`
@@ -342,10 +328,18 @@ export async function fetchOrdersPages(query: string) {
     return Math.ceil(Number(data[0].count) / ITEMS_PER_PAGE);
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to fetch total number of invoices.');
+    throw new Error('Failed to fetch total number of orders.');
   }
 }
 
+/**
+ * Fetches a paginated, searchable list of orders with full relational data
+ * (customer, provider, service). Includes location coordinates and route geometry
+ * for map rendering.
+ *
+ * @param query       - Free-text search string.
+ * @param currentPage - 1-based page number.
+ */
 export async function fetchFilteredOrders(
   query: string = '',
   currentPage: number = 1,
@@ -398,6 +392,12 @@ export async function fetchFilteredOrders(
   }
 }
 
+/**
+ * Fetches a single order by UUID along with its associated reviews.
+ * Returns `null` for the order if not found.
+ *
+ * @param id - Order UUID.
+ */
 export async function fetchOrderById(id: string): Promise<{
   order: OrdersTable | null;
   reviews: {authorRole: string; rating: number; comment: string | null}[];
@@ -453,10 +453,7 @@ export async function fetchOrderById(id: string): Promise<{
       comment: r.comment,
     }));
 
-    return {
-      order,
-      reviews
-    };
+    return { order, reviews };
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch order.');
